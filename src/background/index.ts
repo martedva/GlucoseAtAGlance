@@ -1,4 +1,5 @@
 import { runtime } from 'webextension-polyfill'
+import LibreViewResponse from '../types/libreViewResponse';
 
 runtime.onInstalled.addListener(async () => {
   console.log('[background] loaded')
@@ -17,10 +18,7 @@ runtime.onInstalled.addListener(async () => {
       return;
     }
 
-    res.json().then(function(data) {
-      console.log("success")
-      console.log(data)
-    })
+    res.json().then((response: LibreViewResponse) => console.log(response.data.connection.glucoseItem.Value + " mmol/L"))
   });
 })
 

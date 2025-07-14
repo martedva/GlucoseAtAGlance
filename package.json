@@ -44,6 +44,7 @@
   "devDependencies": {
     "@types/chrome": "^0.0.248",
     "@types/webextension-polyfill": "^0.10.5",
+    "copy-webpack-plugin": "^13.0.0",
     "customize-cra": "^1.0.0",
     "react-app-rewired": "^2.2.1"
   }

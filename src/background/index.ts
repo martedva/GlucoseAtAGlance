@@ -21,7 +21,7 @@ chrome.runtime.onInstalled.addListener(async ({ reason }) => {
 
 const FetchGlucose = async () => {
   // ZUSTAND AND TANSTACK QUERY
-  const token = GetAuthToken("mart.edva@gmail.com", "!!Vw1303b10!!");
+  // const token = GetAuthToken("username", "password");
 
   const res = await fetch('https://api-eu.libreview.io/llu/connections/77dceb9e-9267-e911-815d-0610e6e38cbd/graph', {
     method: 'GET',

@@ -1,4 +1,5 @@
 import AuthTicket from "./authTicket";
+import User from "./user";
 
 interface LoginResponse {
     status: number;

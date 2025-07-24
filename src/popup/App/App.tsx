@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import './App.css';
+import LibreViewResponse from '../../types/libreViewResponse';
 
 type NumberToStringDictionary = {
   [key: number]: string;
@@ -23,18 +24,33 @@ const measurementColorDict: NumberToStringDictionary = {
 const GetLibreViewData = (
   setGlucose: Dispatch<SetStateAction<string | undefined>>
 ) => {
-  chrome.runtime.sendMessage({ action: "GetLibreViewData" }, function (response) {
+  chrome.runtime.sendMessage({ action: "GetLibreViewData" }, function (response: LibreViewResponse) {
     let glucose: string = response.data.connection.glucoseItem.Value.toString();
     setGlucose(glucose);
   });
 }
 
+const GetToken = (
+  setToken: Dispatch<SetStateAction<string | undefined>>
+) => {
+  chrome.runtime.sendMessage({ action: "GetToken" }, function (response: string) {
+    setToken(response);
+  });
+}
+
 function App() {
   const [glucose, setGlucose] = useState<string>();
+  const [token, setToken] = useState<string>();
 
   useEffect(() => {
-    GetLibreViewData(setGlucose);
+    if (!token) { 
+      GetToken(setToken);
+    }
   }, []);
+  
+  useEffect(() => {
+    if (token) GetLibreViewData(setGlucose);
+  }, [token]);
 
   return (
     <div className="App" style={{ width: '150px', height: '50px' }}>

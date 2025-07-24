@@ -1,21 +1,47 @@
-import { getLibreGraph } from '../api/libre/libre-api';
+import { getLibreGraph, getLibreToken } from '../api/libre/libre-api';
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "GetLibreViewData") {
-    getLibreGraph("77dceb9e-9267-e911-815d-0610e6e38cbd")
-      .then((graphData) => {
-        sendResponse(graphData);
-      })
-      .catch(() => {
-        sendResponse(undefined);
-      })
-      .finally(() => {
-        return true;
-      });;
+    chrome.storage.local.get(['patientId'], (result) => {
+      const patientId = result.patientId;
 
+      getLibreGraph(patientId)
+        .then((graphData) => {
+          sendResponse(graphData);
+        })
+        .catch(() => {
+          sendResponse(undefined);
+        });
+  
+    });
     return true; 
   }
+  return false;
+});
 
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === "GetToken") {
+    chrome.storage.local.get(['token'], (result) => {
+      const token = result.token;
+      if (token) {
+        sendResponse(token);
+        return;
+      }
+
+      getLibreToken("mart.edva@gmail.com", "!!Vw1303b10!!")
+        .then((tokenData) => {
+          chrome.storage.local.set({ token: tokenData.data.authTicket.token, patientId: tokenData.data.user.id });
+
+          const token = tokenData.data.authTicket.token;
+          sendResponse(token);
+        })
+        .catch(() => {
+          sendResponse(undefined);
+        })
+
+    });
+    return true;
+  }
   return false;
 });
 
@@ -47,22 +73,26 @@ const measurementColorDict: NumberToStringDictionary = {
 }
 
 chrome.alarms.onAlarm.addListener(async (alarm) => {
-  const graphData = await getLibreGraph( "77dceb9e-9267-e911-815d-0610e6e38cbd");
+  chrome.storage.local.get(['patientId'], async (result) => {
+    const patientId = result.patientId;
 
-  if (graphData === undefined) return;
-
-  const color = graphData.data.connection.glucoseItem.MeasurementColor;
-  const arrow = graphData.data.connection.glucoseItem.TrendArrow;
-
-  const icon = `${measurementColorDict[color]}-${trendArrowDict[arrow]}`;
-
-  chrome.action.setIcon({
-    path: {
-      "16": chrome.runtime.getURL(`static/assets/icons/${icon}.png`),
-      "32": chrome.runtime.getURL(`static/assets/icons/${icon}.png`),
-      "48": chrome.runtime.getURL(`static/assets/icons/${icon}.png`),
-      "128": chrome.runtime.getURL(`static/assets/icons/${icon}.png`)
-    }
+    const graphData = await getLibreGraph(patientId);
+  
+    if (graphData === undefined) return;
+  
+    const color = graphData.data.connection.glucoseItem.MeasurementColor;
+    const arrow = graphData.data.connection.glucoseItem.TrendArrow;
+  
+    const icon = `${measurementColorDict[color]}-${trendArrowDict[arrow]}`;
+  
+    chrome.action.setIcon({
+      path: {
+        "16": chrome.runtime.getURL(`static/assets/icons/${icon}.png`),
+        "32": chrome.runtime.getURL(`static/assets/icons/${icon}.png`),
+        "48": chrome.runtime.getURL(`static/assets/icons/${icon}.png`),
+        "128": chrome.runtime.getURL(`static/assets/icons/${icon}.png`)
+      }
+    });
   });
 });
 

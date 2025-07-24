@@ -1,7 +1,5 @@
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import LibreViewData from '../../types/data';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import './App.css';
-import LoginResponse from '../../types/loginResponse';
 
 type NumberToStringDictionary = {
   [key: number]: string;
@@ -23,28 +21,19 @@ const measurementColorDict: NumberToStringDictionary = {
 }
 
 const GetLibreViewData = (
-  setGlucose: Dispatch<SetStateAction<string | undefined>>,
-  setTrendArrow: Dispatch<SetStateAction<number | undefined>>
+  setGlucose: Dispatch<SetStateAction<string | undefined>>
 ) => {
-  console.log("GetLibreViewData called!");
   chrome.runtime.sendMessage({ action: "GetLibreViewData" }, function (response) {
-    let glucose: string = response.connection.glucoseItem.Value;
-    setGlucose(glucose)
-    
-    console.log("glucose", glucose);
-
-    let trendArrowId: number = response.connection.glucoseItem.TrendArrow;
-    let trendArrow: string = trendArrowDict[trendArrowId];
-    setTrendArrow(trendArrowId)
+    let glucose: string = response.data.connection.glucoseItem.Value.toString();
+    setGlucose(glucose);
   });
 }
 
 function App() {
-  const [glucose, setGlucose] = useState<string>()
-  const [trendArrow, setTrendArrow] = useState<number>()
+  const [glucose, setGlucose] = useState<string>();
 
   useEffect(() => {
-    GetLibreViewData(setGlucose, setTrendArrow);
+    GetLibreViewData(setGlucose);
   }, []);
 
   return (

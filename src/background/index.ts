@@ -28,7 +28,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         return;
       }
 
-      getLibreToken("mart.edva@gmail.com", "!!Vw1303b10!!")
+      getLibreToken("", "")
         .then((tokenData) => {
           chrome.storage.local.set({ token: tokenData.data.authTicket.token, patientId: tokenData.data.user.id });
 

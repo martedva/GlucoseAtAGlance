@@ -1,6 +1,12 @@
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import './App.css';
+import DevelopmentGraph from '../../components/DevelopmentGraph';
 import LibreViewResponse from '../../types/libreViewResponse';
+import './App.css';
+
+export type GraphData = {
+  time: Date;
+  value: number;
+};
 
 type NumberToStringDictionary = {
   [key: number]: string;
@@ -21,12 +27,27 @@ const measurementColorDict: NumberToStringDictionary = {
   3: "orange",
 }
 
-const GetLibreViewData = (
-  setGlucose: Dispatch<SetStateAction<string | undefined>>
+const  GetLibreViewData = (
+  setGlucose: Dispatch<SetStateAction<string | undefined>>,
+  setTargetLow: Dispatch<SetStateAction<number | undefined>>,
+  setTargetHigh: Dispatch<SetStateAction<number | undefined>>,
+  setGraphData: Dispatch<SetStateAction<GraphData[] | undefined>>
 ) => {
   chrome.runtime.sendMessage({ action: "GetLibreViewData" }, function (response: LibreViewResponse) {
-    let glucose: string = response.data.connection.glucoseItem.Value.toString();
+    const glucose: string = response.data.connection.glucoseItem.Value.toString();
     setGlucose(glucose);
+
+    // The conversion factor (18.01554) comes from the molecular weight of glucose divided by 1000, 
+    // since mmol/L measures the number of molecules while mg/dL measures the weight.
+    const targetLow: number = response.data.connection.targetLow / 18.01554; // convert mg/dL to mmol/L
+    setTargetLow(targetLow);
+    const targetHigh: number = response.data.connection.targetHigh / 18.01554; // convert mg/dL to mmol/L
+    setTargetHigh(targetHigh);
+    const graphData: GraphData[] = response.data.graphData.map((item) => ({
+      time: item.Timestamp,
+      value: item.Value
+    }));
+    setGraphData(graphData);
   });
 }
 
@@ -40,6 +61,9 @@ const GetToken = (
 
 function App() {
   const [glucose, setGlucose] = useState<string>();
+  const [graphData, setGraphData] = useState<GraphData[]>();
+  const [targetLow, setTargetLow] = useState<number>();
+  const [targetHigh, setTargetHigh] = useState<number>();
   const [token, setToken] = useState<string>();
 
   useEffect(() => {
@@ -49,16 +73,17 @@ function App() {
   }, []);
   
   useEffect(() => {
-    if (token) GetLibreViewData(setGlucose);
+    if (token) GetLibreViewData(setGlucose, setTargetLow, setTargetHigh, setGraphData);
   }, [token]);
 
   return (
-    <div className="App" style={{ width: '150px', height: '50px' }}>
-      <header className="App-header">
+    <div className="App" style={{ width: '550px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', padding: '20px' }}>
         <p style={{ fontSize: '16px', fontWeight: 'bold' }}>
           {glucose} mmol/L
         </p>
-      </header>
+        <DevelopmentGraph graphData={graphData} targetLow={targetLow} targetHigh={targetHigh} />
+      </div>
     </div>
   );
 }

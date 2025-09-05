@@ -26,13 +26,13 @@ const DevelopmentGraph = ({ graphData, targetLow, targetHigh }: DevelopmentGraph
         Plot.line(parsedData, {
           x: "time",
           y: "value",
-          stroke: "#3b82f6",
+          stroke: "#000000",
           strokeWidth: 3
         }),
         Plot.dot(parsedData, {
           x: "time",
           y: "value",
-          fill: "#3b82f6",
+          fill: "#000000",
           r: 3.5
         }),
         Plot.rect([{}], {
@@ -40,7 +40,7 @@ const DevelopmentGraph = ({ graphData, targetLow, targetHigh }: DevelopmentGraph
           x2: parsedData[parsedData.length - 1].time,
           y1: targetLow,
           y2: targetHigh,
-          fill: "#fbbf24",
+          fill: "#88ba82",
           fillOpacity: 0.3
         }),
       ],

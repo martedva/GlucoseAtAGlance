@@ -92,15 +92,12 @@ function App() {
   return (
     <div className="App" style={{ width: '640px' }}>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', padding: '20px' }}>
-        <p style={{ fontSize: '16px', fontWeight: 'bold' }}>
-          {glucose} mmol/L
-        </p>
+        <h3>{glucose} mmol/L</h3>
+
         <DevelopmentGraph graphData={graphData} targetLow={targetLow} targetHigh={targetHigh} />
       </div>
 
-      <p style={{ fontSize: '16px' }}>
-          Sensor ends in {daysToExpire} day(s)
-        </p>
+      <p>Sensor ends in {daysToExpire} day(s)</p>
     </div>
   );
 }

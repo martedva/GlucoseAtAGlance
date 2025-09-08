@@ -1,13 +1,47 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Lato:wght@400;500&display=swap');
+
+/* Define your custom color as a CSS variable */
+:root {
+  --cvi-dark-blue: #1e3a8a; /* Replace with your actual color value */
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+/* Base styles */
+h1 {
+  font-size: 3rem; 
+  font-weight: 600;
+  color: var(--cvi-dark-blue);
+  line-height: 1.25;
+  font-family: 'Poppins', Arial, Helvetica, sans-serif;
+}
+
+h2 {
+  font-size: 2.25rem;
+  font-weight: 600;
+  color: var(--cvi-dark-blue); 
+  line-height: 1.25;
+  font-family: 'Poppins', Arial, Helvetica, sans-serif;
+}
+
+h3 {
+  font-size: 1.875rem;
+  font-weight: 600;
+  color: var(--cvi-dark-blue);
+  line-height: 1.25;
+  font-family: 'Poppins', Arial, Helvetica, sans-serif;
+}
+
+h4 {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--cvi-dark-blue);
+  line-height: 1.25;
+  font-family: 'Poppins', Arial, Helvetica, sans-serif;
+}
+
+p, span {
+  font-size: 1rem;
+  font-weight: 400; 
+  color: var(--cvi-dark-blue); 
+  font-family: 'Lato', Arial, Helvetica, sans-serif;
 }

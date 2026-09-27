@@ -5,7 +5,14 @@ describe('GlucoseDisplay', () => {
   const defaultProps = {
     daysToExpire: 7,
     sensorStatus: 'normal' as const,
+    graphData: [],
   };
+
+  const mockGraphData = [
+    { time: new Date(Date.now() - 30 * 60 * 1000), value: 5.0 },
+    { time: new Date(Date.now() - 15 * 60 * 1000), value: 5.5 },
+    { time: new Date(), value: 6.0 },
+  ];
 
   it('should render glucose value with one decimal place', () => {
     render(<GlucoseDisplay {...defaultProps} glucose={5.5} />);
@@ -79,5 +86,18 @@ describe('GlucoseDisplay', () => {
     const heading = screen.getByRole('heading');
     expect(heading).toHaveAttribute('aria-live', 'polite');
     expect(heading).toHaveAttribute('aria-atomic', 'true');
+  });
+
+  it('should show trend prediction when graph data is provided', () => {
+    render(<GlucoseDisplay {...defaultProps} glucose={6.0} graphData={mockGraphData} />);
+
+    // Should show trend description (rising or stable depending on calculation)
+    expect(screen.queryByText(/rising|stable|falling/)).toBeInTheDocument();
+  });
+
+  it('should not show trend when no graph data', () => {
+    render(<GlucoseDisplay {...defaultProps} glucose={6.0} graphData={[]} />);
+
+    expect(screen.queryByText(/rising|stable|falling/)).not.toBeInTheDocument();
   });
 });

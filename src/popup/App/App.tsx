@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import ConnectionStatusIndicator from '@/components/ConnectionStatusIndicator';
 import DevelopmentGraph from '@/components/DevelopmentGraph';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import GlucoseDisplay from '@/components/GlucoseDisplay';
 import LoginForm from '@/components/LoginForm';
 import SettingsPanel, { type UserPreferences } from '@/components/SettingsPanel';
 import { SENSOR_CONFIG, UI_CONFIG } from '@/config';
-import { useAuth, useGlucoseData, usePreferences } from '@/hooks';
+import { useAuth, useGlucoseData, usePreferences, useConnectionStatus } from '@/hooks';
 import { useSensorExpiry } from '@/hooks/useSensorExpiry';
 import { parseLibreTimestamp } from '@/types/api';
 import './App.css';
@@ -16,9 +17,13 @@ import './App.css';
  */
 function App() {
   const { isAuthenticated, isAuthLoaded, login, logout } = useAuth();
-  const { data, isLoading: isDataLoading, error, fetchData } = useGlucoseData();
+  const { data, isLoading: isDataLoading, error, lastFetchTime, fetchData } = useGlucoseData();
   const { daysToExpire, sensorStatus } = useSensorExpiry(data?.data?.activeSensors?.[0]);
   const { preferences, savePreferences, isLoading: isPrefsLoading } = usePreferences();
+  const { status: connectionStatus } = useConnectionStatus(
+    preferences.refreshInterval,
+    lastFetchTime
+  );
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const handleLoginSuccess = useCallback(() => {
@@ -123,6 +128,12 @@ function App() {
           role="main"
           aria-label="Glucose monitoring dashboard"
         >
+          {/* Connection Status Indicator - Critical for safety */}
+          <ConnectionStatusIndicator
+            status={connectionStatus}
+            lastSuccessfulFetch={lastFetchTime}
+          />
+
           {/* Header with glucose display and action buttons on same line */}
           <div
             style={{
@@ -137,6 +148,7 @@ function App() {
               glucose={glucoseValue}
               daysToExpire={daysToExpire}
               sensorStatus={sensorStatus}
+              graphData={graphData}
             />
             <div style={{ display: 'flex', gap: '8px' }} role="group" aria-label="Actions">
               <button

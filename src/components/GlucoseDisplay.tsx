@@ -1,10 +1,17 @@
 import { memo } from 'react';
 import type { SensorExpiryStatus } from '@/hooks/useSensorExpiry';
+import { predictGlucoseTrend, getTrendArrowFromPrediction, getTrendDescription } from '@/utils/trend-prediction';
+
+interface GraphDataPoint {
+  time: Date;
+  value: number;
+}
 
 interface GlucoseDisplayProps {
   glucose?: number;
   daysToExpire: number | null;
   sensorStatus: SensorExpiryStatus;
+  graphData?: GraphDataPoint[];
 }
 
 const getExpiryStyles = (status: SensorExpiryStatus) => {
@@ -31,14 +38,23 @@ const getSensorStatusLabel = (status: SensorExpiryStatus): string => {
 
 /**
  * Memoized glucose display component
- * Shows current glucose value and sensor expiry
+ * Shows current glucose value, sensor expiry, and trend prediction
  */
 const GlucoseDisplay = memo(function GlucoseDisplay({
   glucose,
   daysToExpire,
   sensorStatus,
+  graphData,
 }: GlucoseDisplayProps) {
   const expiryStyles = getExpiryStyles(sensorStatus);
+
+  // Calculate trend prediction from graph data
+  const trendPrediction = graphData && graphData.length > 0
+    ? predictGlucoseTrend(graphData)
+    : null;
+
+  const trendArrow = trendPrediction ? getTrendArrowFromPrediction(trendPrediction.predictedChange) : null;
+  const trendDescription = trendPrediction ? getTrendDescription(trendPrediction) : null;
 
   return (
     <div
@@ -51,9 +67,20 @@ const GlucoseDisplay = memo(function GlucoseDisplay({
       role="region"
       aria-label="Glucose monitoring display"
     >
-      <h3 style={{ margin: 0 }} aria-live="polite" aria-atomic="true">
-        {glucose?.toFixed(1) ?? '--'} mmol/L
-      </h3>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <h3 style={{ margin: 0 }} aria-live="polite" aria-atomic="true">
+          {glucose?.toFixed(1) ?? '--'} mmol/L
+        </h3>
+        {trendArrow && (
+          <span
+            style={{ fontSize: '20px' }}
+            aria-label={`Glucose trend: ${trendDescription}`}
+            title={trendDescription || undefined}
+          >
+            {trendArrow}
+          </span>
+        )}
+      </div>
       {daysToExpire !== null && (
         <p
           className={`sensor-expiry ${sensorStatus}`}
@@ -65,6 +92,20 @@ const GlucoseDisplay = memo(function GlucoseDisplay({
           aria-label={`Sensor expiry: ${getSensorStatusLabel(sensorStatus)}, ${daysToExpire} day${daysToExpire !== 1 ? 's' : ''} remaining`}
         >
           Sensor ends in {daysToExpire} day{daysToExpire !== 1 ? 's' : ''}
+        </p>
+      )}
+      {trendPrediction && (
+        <p
+          style={{
+            margin: 0,
+            fontSize: '12px',
+            color: trendPrediction.predictedChange > 0.1 ? '#f57c00' :
+                   trendPrediction.predictedChange < -0.1 ? '#1976d2' : '#666',
+          }}
+          aria-label={`Predicted change: ${trendDescription}`}
+        >
+          {trendPrediction.confidence === 'high' && '↑ '}
+          {trendDescription}
         </p>
       )}
     </div>

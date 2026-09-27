@@ -10,6 +10,7 @@ interface UseGlucoseDataReturn {
   data: LibreViewResponse | null;
   isLoading: boolean;
   error: string | null;
+  lastFetchTime: Date | null;
   fetchData: () => Promise<void>;
   clearError: () => void;
 }
@@ -17,11 +18,13 @@ interface UseGlucoseDataReturn {
 /**
  * Hook for fetching glucose data from LibreLinkUp API
  * Communicates with background script for API calls
+ * Tracks last successful fetch time for data freshness monitoring
  */
 export function useGlucoseData(): UseGlucoseDataReturn {
   const [data, setData] = useState<LibreViewResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastFetchTime, setLastFetchTime] = useState<Date | null>(null);
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
@@ -50,10 +53,11 @@ export function useGlucoseData(): UseGlucoseDataReturn {
       }
 
       setData({ data: response.data } as LibreViewResponse);
+      setLastFetchTime(new Date());
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load glucose data';
       setError(errorMessage);
-      setData(null);
+      // Don't clear data on error - show stale data with warning instead
     } finally {
       setIsLoading(false);
     }
@@ -67,6 +71,7 @@ export function useGlucoseData(): UseGlucoseDataReturn {
     data,
     isLoading,
     error,
+    lastFetchTime,
     fetchData,
     clearError,
   };

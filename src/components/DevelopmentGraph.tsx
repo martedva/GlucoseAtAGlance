@@ -9,7 +9,7 @@ interface DevelopmentGraphProps {
 }
 
 const DevelopmentGraph = ({ graphData, targetLow, targetHigh }: DevelopmentGraphProps) => {
-  const containerRef = useRef(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!containerRef.current || !graphData) return;
@@ -61,16 +61,17 @@ const DevelopmentGraph = ({ graphData, targetLow, targetHigh }: DevelopmentGraph
     });
 
     // Clear previous content and append new plot
-    (containerRef.current as HTMLDivElement).innerHTML = '';
-    (containerRef.current as HTMLDivElement).appendChild(plot);
+    const container = containerRef.current;
+    container.innerHTML = '';
+    container.appendChild(plot);
 
     // Cleanup function
     return () => {
-      if (containerRef.current) {
-        (containerRef.current as HTMLDivElement).innerHTML = '';
+      if (container) {
+        container.innerHTML = '';
       }
     };
-  }, [graphData]);
+  }, [graphData, targetLow, targetHigh]);
 
   return (
     <div className="p-4">

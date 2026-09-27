@@ -1,11 +1,10 @@
+import { memo } from 'react';
 import type { SensorExpiryStatus } from '@/hooks/useSensorExpiry';
 
 interface GlucoseDisplayProps {
   glucose?: number;
   daysToExpire: number | null;
   sensorStatus: SensorExpiryStatus;
-  onRefresh: () => void;
-  onLogout: () => void;
 }
 
 const getExpiryStyles = (status: SensorExpiryStatus) => {
@@ -30,66 +29,46 @@ const getSensorStatusLabel = (status: SensorExpiryStatus): string => {
   }
 };
 
-const GlucoseDisplay = ({
+/**
+ * Memoized glucose display component
+ * Shows current glucose value and sensor expiry
+ */
+const GlucoseDisplay = memo(function GlucoseDisplay({
   glucose,
   daysToExpire,
   sensorStatus,
-  onRefresh,
-  onLogout,
-}: GlucoseDisplayProps) => {
+}: GlucoseDisplayProps) {
   const expiryStyles = getExpiryStyles(sensorStatus);
 
   return (
     <div
       style={{
         display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        width: '100%',
+        flexDirection: 'column',
+        gap: '8px',
+        alignItems: 'flex-start',
       }}
       role="region"
-      aria-label="Glucose monitoring dashboard"
+      aria-label="Glucose monitoring display"
     >
-      <div
-        style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start' }}
-      >
-        <h3 style={{ margin: 0 }} aria-live="polite" aria-atomic="true">
-          {glucose?.toFixed(1) ?? '--'} mmol/L
-        </h3>
-        {daysToExpire !== null && (
-          <p
-            className={`sensor-expiry ${sensorStatus}`}
-            style={{
-              margin: 0,
-              fontSize: '13px',
-              ...expiryStyles,
-            }}
-            aria-label={`Sensor expiry: ${getSensorStatusLabel(sensorStatus)}, ${daysToExpire} day${daysToExpire !== 1 ? 's' : ''} remaining`}
-          >
-            Sensor ends in {daysToExpire} day{daysToExpire !== 1 ? 's' : ''}
-          </p>
-        )}
-      </div>
-      <div style={{ display: 'flex', gap: '10px' }} role="group" aria-label="Actions">
-        <button
-          type="button"
-          onClick={onRefresh}
-          className="refresh-button"
-          aria-label="Refresh glucose data"
+      <h3 style={{ margin: 0 }} aria-live="polite" aria-atomic="true">
+        {glucose?.toFixed(1) ?? '--'} mmol/L
+      </h3>
+      {daysToExpire !== null && (
+        <p
+          className={`sensor-expiry ${sensorStatus}`}
+          style={{
+            margin: 0,
+            fontSize: '13px',
+            ...expiryStyles,
+          }}
+          aria-label={`Sensor expiry: ${getSensorStatusLabel(sensorStatus)}, ${daysToExpire} day${daysToExpire !== 1 ? 's' : ''} remaining`}
         >
-          Refresh
-        </button>
-        <button
-          type="button"
-          onClick={onLogout}
-          className="logout-button"
-          aria-label="Log out of account"
-        >
-          Logout
-        </button>
-      </div>
+          Sensor ends in {daysToExpire} day{daysToExpire !== 1 ? 's' : ''}
+        </p>
+      )}
     </div>
   );
-};
+});
 
 export default GlucoseDisplay;

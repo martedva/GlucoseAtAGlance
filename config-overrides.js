@@ -1,4 +1,4 @@
-const { override, addWebpackResolve } = require('customize-cra');
+const { override, addWebpackResolve, addWebpackModuleRule, enableSourceMaps } = require('customize-cra');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 
@@ -15,7 +15,7 @@ const overrideOutput = (config) => {
   config.output = {
     ...config.output,
     filename: 'static/js/[name].js',
-    chunkFilename: 'static/js/[name].js',
+    chunkFilename: 'static/js/[name].chunk.js',
   };
 
   return config;
@@ -46,6 +46,37 @@ const overridePlugins = (config) => {
   return config;
 };
 
-module.exports = function webpack(config) {
-  return override(overrideEntry, overrideOutput, overrideResolve, overridePlugins)(config);
+const optimizeProduction = (config, env) => {
+  if (env === 'production') {
+    // Disable source maps for production to reduce bundle size
+    config.devtool = false;
+
+    // Optimize Terser settings for smaller bundles
+    if (config.optimization?.minimizer) {
+      config.optimization.minimizer.forEach((minimizer) => {
+        if (minimizer.options?.terserOptions) {
+          minimizer.options.terserOptions = {
+            ...minimizer.options.terserOptions,
+            compress: {
+              ...minimizer.options.terserOptions.compress,
+              drop_console: true, // Remove console.log in production
+              drop_debugger: true,
+            },
+          };
+        }
+      });
+    }
+  }
+
+  return config;
+};
+
+module.exports = function webpack(config, env) {
+  return override(
+    overrideEntry,
+    overrideOutput,
+    overrideResolve,
+    overridePlugins,
+    optimizeProduction
+  )(config, env);
 };

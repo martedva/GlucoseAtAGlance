@@ -1,13 +1,14 @@
 /**
  * LibreLinkUp API Response Types
+ * Note: Timestamps from API are strings in format "/Date(timestamp)/" or ISO strings
  */
 
 // Glucose Measurement
 export interface GlucoseMeasurement {
-  FactoryTimestamp: Date;
+  FactoryTimestamp: string;
   GlucoseUnits: number;
   MeasurementColor: number; // 1=green, 2=yellow, 3=orange, 4=red
-  Timestamp: Date;
+  Timestamp: string;
   Value: number;
   ValueInMgPerDl: number;
   IsHigh: boolean;
@@ -26,6 +27,7 @@ export interface SensorData {
   deviceId: string;
   sn: string;
   a?: number; // Activation timestamp (Unix seconds)
+  e?: number; // Expiry timestamp (Unix seconds)
   w?: number;
   pt?: number;
   s?: boolean;
@@ -109,15 +111,16 @@ export interface Connection {
 
 // Graph Data Point
 export interface GraphDataPoint {
-  FactoryTimestamp: Date;
+  FactoryTimestamp: string;
   GlucoseUnits: number;
   MeasurementColor: number;
-  Timestamp: Date;
+  Timestamp: string;
   Value: number;
   ValueInMgPerDl: number;
   IsHigh: boolean;
   IsLow: boolean;
   Type: number;
+  TrendArrow: number;
 }
 
 // Ticket (Session)
@@ -195,4 +198,35 @@ export interface LibreViewResponse {
     graphData: GraphDataPoint[];
   };
   ticket: Ticket;
+}
+
+/**
+ * Helper function to parse LibreLinkUp timestamp string to Date
+ * API returns timestamps in format "/Date(1234567890)/" or similar
+ */
+export function parseLibreTimestamp(timestamp: string): Date {
+  // Handle /Date(timestamp)/ format
+  const match = timestamp.match(/\/Date\((-?\d+)\)\//);
+  if (match) {
+    return new Date(parseInt(match[1], 10));
+  }
+  // Fallback to standard Date parsing
+  return new Date(timestamp);
+}
+
+/**
+ * Helper function to parse graph data with proper date conversion
+ */
+export function parseGraphData(graphData: GraphDataPoint[]): Array<{
+  time: Date;
+  value: number;
+  trendArrow: number;
+  measurementColor: number;
+}> {
+  return graphData.map((item) => ({
+    time: parseLibreTimestamp(item.Timestamp),
+    value: item.Value,
+    trendArrow: item.TrendArrow,
+    measurementColor: item.MeasurementColor,
+  }));
 }

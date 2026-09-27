@@ -1,13 +1,10 @@
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import GlucoseDisplay from '../GlucoseDisplay';
 
 describe('GlucoseDisplay', () => {
   const defaultProps = {
     daysToExpire: 7,
     sensorStatus: 'normal' as const,
-    onRefresh: jest.fn(),
-    onLogout: jest.fn(),
   };
 
   it('should render glucose value with one decimal place', () => {
@@ -73,37 +70,14 @@ describe('GlucoseDisplay', () => {
     expect(expiryText).toHaveStyle('font-weight: 400');
   });
 
-  it('should call onRefresh when refresh button is clicked', async () => {
-    const user = userEvent.setup();
-    const onRefresh = jest.fn();
+  it('should have proper accessibility attributes', () => {
+    const { container } = render(<GlucoseDisplay {...defaultProps} glucose={5.5} />);
 
-    render(<GlucoseDisplay {...defaultProps} onRefresh={onRefresh} />);
+    const region = container.querySelector('[role="region"]');
+    expect(region).toHaveAttribute('aria-label', 'Glucose monitoring display');
 
-    const refreshButton = screen.getByRole('button', { name: 'Refresh glucose data' });
-    await user.click(refreshButton);
-
-    expect(onRefresh).toHaveBeenCalledTimes(1);
-  });
-
-  it('should call onLogout when logout button is clicked', async () => {
-    const user = userEvent.setup();
-    const onLogout = jest.fn();
-
-    render(<GlucoseDisplay {...defaultProps} onLogout={onLogout} />);
-
-    const logoutButton = screen.getByRole('button', { name: 'Log out of account' });
-    await user.click(logoutButton);
-
-    expect(onLogout).toHaveBeenCalledTimes(1);
-  });
-
-  it('should have button type="button" for accessibility', () => {
-    render(<GlucoseDisplay {...defaultProps} />);
-
-    const refreshButton = screen.getByRole('button', { name: 'Refresh glucose data' });
-    const logoutButton = screen.getByRole('button', { name: 'Log out of account' });
-
-    expect(refreshButton).toHaveAttribute('type', 'button');
-    expect(logoutButton).toHaveAttribute('type', 'button');
+    const heading = screen.getByRole('heading');
+    expect(heading).toHaveAttribute('aria-live', 'polite');
+    expect(heading).toHaveAttribute('aria-atomic', 'true');
   });
 });

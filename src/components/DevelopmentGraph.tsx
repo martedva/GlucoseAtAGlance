@@ -1,5 +1,5 @@
 import * as Plot from '@observablehq/plot';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo, memo } from 'react';
 import LoadingSkeleton from './LoadingSkeleton';
 
 export interface GraphDataPoint {
@@ -14,33 +14,32 @@ interface DevelopmentGraphProps {
   isLoading?: boolean;
 }
 
-const DevelopmentGraph = ({
+/**
+ * Memoized graph component for glucose data visualization
+ * Uses Observable Plot for rendering
+ */
+const DevelopmentGraph = memo(function DevelopmentGraph({
   graphData,
   targetLow,
   targetHigh,
   isLoading = false,
-}: DevelopmentGraphProps) => {
+}: DevelopmentGraphProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!containerRef.current || !graphData || graphData.length === 0) return;
-
-    // Parse the time strings to Date objects
-    const parsedData = graphData.map((d) => ({
-      ...d,
-      time: new Date(d.time),
-    }));
+  // Memoize plot configuration
+  const plotConfig = useMemo(() => {
+    if (!graphData || graphData.length === 0) return null;
 
     // Create the plot marks
     // biome-ignore lint/suspicious/noExplicitAny: Plot marks type is not exported by @observablehq/plot
     const marks: any[] = [
-      Plot.line(parsedData, {
+      Plot.line(graphData, {
         x: 'time',
         y: 'value',
         stroke: '#000000',
         strokeWidth: 3,
       }),
-      Plot.dot(parsedData, {
+      Plot.dot(graphData, {
         x: 'time',
         y: 'value',
         fill: '#000000',
@@ -52,8 +51,8 @@ const DevelopmentGraph = ({
     if (targetLow !== undefined && targetHigh !== undefined) {
       marks.push(
         Plot.rect([{}], {
-          x1: parsedData[0].time,
-          x2: parsedData[parsedData.length - 1].time,
+          x1: graphData[0].time,
+          x2: graphData[graphData.length - 1].time,
           y1: targetLow,
           y2: targetHigh,
           fill: '#88ba82',
@@ -62,15 +61,14 @@ const DevelopmentGraph = ({
       );
     }
 
-    // Create the plot
-    const plot = Plot.plot({
+    return {
       marks,
       width: 640,
       height: 400,
       marginLeft: 50,
       marginBottom: 50,
       x: {
-        type: 'time',
+        type: 'time' as const,
         label: 'Time',
         grid: false,
       },
@@ -79,7 +77,14 @@ const DevelopmentGraph = ({
         domain: [0, 21],
         grid: true,
       },
-    });
+    };
+  }, [graphData, targetLow, targetHigh]);
+
+  useEffect(() => {
+    if (!containerRef.current || !plotConfig || !graphData) return;
+
+    // Create the plot
+    const plot = Plot.plot(plotConfig);
 
     // Add accessibility attributes to the SVG
     const svg = plot.querySelector('svg');
@@ -94,8 +99,7 @@ const DevelopmentGraph = ({
 
       const desc = document.createElementNS('http://www.w3.org/2000/svg', 'desc');
       const dataPoints = graphData.length;
-      const avgValue =
-        graphData.reduce((sum, d) => sum + d.value, 0) / dataPoints;
+      const avgValue = graphData.reduce((sum, d) => sum + d.value, 0) / dataPoints;
       desc.textContent = `Graph showing ${dataPoints} glucose readings. Average: ${avgValue.toFixed(1)} mmol/L`;
       svg.insertBefore(desc, title.nextSibling);
     }
@@ -111,7 +115,7 @@ const DevelopmentGraph = ({
         container.innerHTML = '';
       }
     };
-  }, [graphData, targetLow, targetHigh]);
+  }, [plotConfig, graphData]);
 
   if (isLoading) {
     return (
@@ -134,6 +138,6 @@ const DevelopmentGraph = ({
       <div ref={containerRef} className="graph" />
     </div>
   );
-};
+});
 
 export default DevelopmentGraph;

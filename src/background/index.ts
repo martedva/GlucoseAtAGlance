@@ -1,11 +1,11 @@
 /// <reference types="chrome" />
 
 import { getLibreGraph } from '@/api/libre/libre-api';
+import { ALARM_CONFIG, GLUCOSE_COLORS, getIconPaths, TREND_ARROWS } from '@/config';
 import { authService } from '@/services/authService';
-import { TREND_ARROWS, GLUCOSE_COLORS, getIconPaths, ALARM_CONFIG } from '@/config';
 
 // Single message listener handling all actions
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
   switch (request.action) {
     case 'GetLibreViewData':
       handleGetLibreViewData(sendResponse);
@@ -122,5 +122,3 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     console.error('[Background] Error updating icon:', error);
   }
 });
-
-export {};

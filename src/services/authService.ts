@@ -19,7 +19,7 @@ const STORAGE_KEY_PATIENT_ID = 'patient_id';
 
 /**
  * AuthService - Handles authentication for LibreLinkUp API
- * 
+ *
  * Responsibilities:
  * - Login with email/password
  * - Store/retrieve tokens securely
@@ -33,7 +33,7 @@ export const authService = {
   async login(email: string, password: string): Promise<AuthToken> {
     try {
       const response: LoginResponse = await getLibreToken(email, password);
-      
+
       if (!response?.data?.authTicket?.token || !response?.data?.user?.id) {
         throw new Error('Invalid response from authentication server');
       }
@@ -78,19 +78,16 @@ export const authService = {
    */
   async getToken(): Promise<AuthToken | null> {
     return new Promise((resolve) => {
-      chrome.storage.local.get(
-        [STORAGE_KEY_TOKEN, STORAGE_KEY_PATIENT_ID],
-        (result) => {
-          if (result[STORAGE_KEY_TOKEN] && result[STORAGE_KEY_PATIENT_ID]) {
-            resolve({
-              token: result[STORAGE_KEY_TOKEN],
-              patientId: result[STORAGE_KEY_PATIENT_ID],
-            });
-          } else {
-            resolve(null);
-          }
+      chrome.storage.local.get([STORAGE_KEY_TOKEN, STORAGE_KEY_PATIENT_ID], (result) => {
+        if (result[STORAGE_KEY_TOKEN] && result[STORAGE_KEY_PATIENT_ID]) {
+          resolve({
+            token: result[STORAGE_KEY_TOKEN],
+            patientId: result[STORAGE_KEY_PATIENT_ID],
+          });
+        } else {
+          resolve(null);
         }
-      );
+      });
     });
   },
 
@@ -107,16 +104,13 @@ export const authService = {
    */
   async logout(): Promise<void> {
     return new Promise((resolve, reject) => {
-      chrome.storage.local.remove(
-        [STORAGE_KEY_TOKEN, STORAGE_KEY_PATIENT_ID],
-        () => {
-          if (chrome.runtime.lastError) {
-            reject(new Error(chrome.runtime.lastError.message));
-          } else {
-            resolve();
-          }
+      chrome.storage.local.remove([STORAGE_KEY_TOKEN, STORAGE_KEY_PATIENT_ID], () => {
+        if (chrome.runtime.lastError) {
+          reject(new Error(chrome.runtime.lastError.message));
+        } else {
+          resolve();
         }
-      );
+      });
     });
   },
 

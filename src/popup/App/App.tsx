@@ -1,10 +1,10 @@
 import { useCallback, useEffect } from 'react';
+import DevelopmentGraph from '@/components/DevelopmentGraph';
+import GlucoseDisplay from '@/components/GlucoseDisplay';
+import LoginForm from '@/components/LoginForm';
+import { SENSOR_CONFIG, UI_CONFIG } from '@/config';
 import { useAuth, useGlucoseData } from '@/hooks';
 import { useSensorExpiry } from '@/hooks/useSensorExpiry';
-import { SENSOR_CONFIG, UI_CONFIG } from '@/config';
-import LoginForm from '@/components/LoginForm';
-import GlucoseDisplay from '@/components/GlucoseDisplay';
-import DevelopmentGraph from '@/components/DevelopmentGraph';
 import './App.css';
 
 function App() {
@@ -46,7 +46,15 @@ function App() {
 
   return (
     <div className="App" style={{ width: `${UI_CONFIG.POPUP_WIDTH}px` }}>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', padding: '20px' }}>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '20px',
+          padding: '20px',
+        }}
+      >
         <GlucoseDisplay
           glucose={data?.data.connection.glucoseItem.Value}
           daysToExpire={daysToExpire}
@@ -71,8 +79,16 @@ function App() {
               value: item.Value,
             })) ?? []
           }
-          targetLow={data?.data.connection.targetLow ? data.data.connection.targetLow / SENSOR_CONFIG.MMOL_TO_MGDL_FACTOR : undefined}
-          targetHigh={data?.data.connection.targetHigh ? data.data.connection.targetHigh / SENSOR_CONFIG.MMOL_TO_MGDL_FACTOR : undefined}
+          targetLow={
+            data?.data.connection.targetLow
+              ? data.data.connection.targetLow / SENSOR_CONFIG.MMOL_TO_MGDL_FACTOR
+              : undefined
+          }
+          targetHigh={
+            data?.data.connection.targetHigh
+              ? data.data.connection.targetHigh / SENSOR_CONFIG.MMOL_TO_MGDL_FACTOR
+              : undefined
+          }
           isLoading={isDataLoading}
         />
       </div>

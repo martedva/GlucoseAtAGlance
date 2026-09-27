@@ -37,7 +37,9 @@ const GlucoseDisplay = ({
         width: '100%',
       }}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start' }}>
+      <div
+        style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start' }}
+      >
         <h3 style={{ margin: 0 }}>{glucose?.toFixed(1) ?? '--'} mmol/L</h3>
         {daysToExpire !== null && (
           <p

@@ -22,7 +22,8 @@ const LoginForm = ({ onLoginSuccess, onError }: LoginFormProps) => {
       await authService.login(email, password);
       onLoginSuccess();
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Login failed. Please check your credentials.';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Login failed. Please check your credentials.';
       setError(errorMessage);
       onError(errorMessage);
     } finally {
@@ -35,7 +36,7 @@ const LoginForm = ({ onLoginSuccess, onError }: LoginFormProps) => {
       <div className="login-form-wrapper">
         <h2 className="login-title">Glucose At A Glance</h2>
         <p className="login-subtitle">Sign in with your LibreLinkUp account</p>
-        
+
         <form onSubmit={handleSubmit} className="login-form">
           <div className="form-group">
             <label htmlFor="email">Email</label>
@@ -71,11 +72,7 @@ const LoginForm = ({ onLoginSuccess, onError }: LoginFormProps) => {
             </div>
           )}
 
-          <button 
-            type="submit" 
-            className="login-button"
-            disabled={isLoading}
-          >
+          <button type="submit" className="login-button" disabled={isLoading}>
             {isLoading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>

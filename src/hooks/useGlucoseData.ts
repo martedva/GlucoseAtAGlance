@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import type { LibreViewResponse } from '@/types/api';
 
 interface GlucoseDataMessage {
@@ -29,13 +29,16 @@ export function useGlucoseData(): UseGlucoseDataReturn {
 
     try {
       const response = await new Promise<GlucoseDataMessage>((resolve, reject) => {
-        chrome.runtime.sendMessage({ action: 'GetLibreViewData' }, (response: GlucoseDataMessage) => {
-          if (chrome.runtime.lastError) {
-            reject(new Error(chrome.runtime.lastError.message));
-          } else {
-            resolve(response);
+        chrome.runtime.sendMessage(
+          { action: 'GetLibreViewData' },
+          (response: GlucoseDataMessage) => {
+            if (chrome.runtime.lastError) {
+              reject(new Error(chrome.runtime.lastError.message));
+            } else {
+              resolve(response);
+            }
           }
-        });
+        );
       });
 
       if (response.error) {

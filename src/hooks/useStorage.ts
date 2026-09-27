@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 /**
  * Generic hook for reading/writing to Chrome storage
@@ -32,15 +32,18 @@ export function useStorage<T>(
   }, [key]);
 
   // Set value in storage
-  const setValue = useCallback(async (newValue: T) => {
-    try {
-      await chrome.storage.local.set({ [key]: newValue });
-      setValueState(newValue);
-    } catch (error) {
-      console.error(`Error saving ${key} to storage:`, error);
-      throw error;
-    }
-  }, [key]);
+  const setValue = useCallback(
+    async (newValue: T) => {
+      try {
+        await chrome.storage.local.set({ [key]: newValue });
+        setValueState(newValue);
+      } catch (error) {
+        console.error(`Error saving ${key} to storage:`, error);
+        throw error;
+      }
+    },
+    [key]
+  );
 
   // Remove value from storage
   const removeValue = useCallback(async () => {
@@ -65,17 +68,17 @@ export function useAuth() {
     'auth_token',
     null
   );
-  const [patientId, setPatientId, removePatientId] = useStorage<string | null>(
-    'patient_id',
-    null
-  );
+  const [patientId, setPatientId, removePatientId] = useStorage<string | null>('patient_id', null);
 
   const isAuthenticated = !!authToken && !!patientId;
 
-  const login = useCallback(async (token: string, patientId: string) => {
-    await setAuthToken(token);
-    await setPatientId(patientId);
-  }, [setAuthToken, setPatientId]);
+  const login = useCallback(
+    async (token: string, patientId: string) => {
+      await setAuthToken(token);
+      await setPatientId(patientId);
+    },
+    [setAuthToken, setPatientId]
+  );
 
   const logout = useCallback(async () => {
     await removeAuthToken();

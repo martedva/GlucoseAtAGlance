@@ -1,5 +1,5 @@
 /* Import Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Lato:wght@400;500&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Lato:wght@400;500&display=swap");
 
 /* Define your custom color as a CSS variable */
 :root {
@@ -8,19 +8,19 @@
 
 /* Base styles */
 h1 {
-  font-size: 3rem; 
+  font-size: 3rem;
   font-weight: 600;
   color: var(--cvi-dark-blue);
   line-height: 1.25;
-  font-family: 'Poppins', Arial, Helvetica, sans-serif;
+  font-family: "Poppins", Arial, Helvetica, sans-serif;
 }
 
 h2 {
   font-size: 2.25rem;
   font-weight: 600;
-  color: var(--cvi-dark-blue); 
+  color: var(--cvi-dark-blue);
   line-height: 1.25;
-  font-family: 'Poppins', Arial, Helvetica, sans-serif;
+  font-family: "Poppins", Arial, Helvetica, sans-serif;
 }
 
 h3 {
@@ -28,7 +28,7 @@ h3 {
   font-weight: 600;
   color: var(--cvi-dark-blue);
   line-height: 1.25;
-  font-family: 'Poppins', Arial, Helvetica, sans-serif;
+  font-family: "Poppins", Arial, Helvetica, sans-serif;
 }
 
 h4 {
@@ -36,12 +36,13 @@ h4 {
   font-weight: 500;
   color: var(--cvi-dark-blue);
   line-height: 1.25;
-  font-family: 'Poppins', Arial, Helvetica, sans-serif;
+  font-family: "Poppins", Arial, Helvetica, sans-serif;
 }
 
-p, span {
+p,
+span {
   font-size: 1rem;
-  font-weight: 400; 
-  color: var(--cvi-dark-blue); 
-  font-family: 'Lato', Arial, Helvetica, sans-serif;
+  font-weight: 400;
+  color: var(--cvi-dark-blue);
+  font-family: "Lato", Arial, Helvetica, sans-serif;
 }

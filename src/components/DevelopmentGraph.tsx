@@ -32,6 +32,7 @@ const DevelopmentGraph = ({
     }));
 
     // Create the plot marks
+    // biome-ignore lint/suspicious/noExplicitAny: Plot marks type is not exported by @observablehq/plot
     const marks: any[] = [
       Plot.line(parsedData, {
         x: 'time',

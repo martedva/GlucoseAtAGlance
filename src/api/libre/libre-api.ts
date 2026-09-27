@@ -1,6 +1,6 @@
-import type { LibreViewResponse, LoginResponse } from '@/types/api';
 import fetchJson from '@/api/fetchJson';
 import { API_CONFIG } from '@/config';
+import type { LibreViewResponse, LoginResponse } from '@/types/api';
 
 const libreApiHeaders: Record<string, string> = {
   product: API_CONFIG.PRODUCT,

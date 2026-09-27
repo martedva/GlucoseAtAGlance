@@ -1,7 +1,7 @@
 interface GlucoseMeasurement {
     FactoryTimestamp: Date;
     GlucoseUnits: number;
-    MeasurementColor: 1;
+    MeasurementColor: number; // 1=green, 2=yellow, 3=orange, 4=red
     Timestamp: Date;
     Value: number;
     ValueInMgPerDl: number;

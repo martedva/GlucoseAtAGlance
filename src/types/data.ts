@@ -1,10 +1,10 @@
 import Connection from "./connection";
 import GlucoseMeasurement from "./glucoseMeasurement";
-import Sensor from "./sensor";
+import SensorData from "./sensorData";
 
 interface Data {
     connection: Connection;
-    activeSensors: Sensor[];
+    activeSensors: SensorData[];
     graphData: GlucoseMeasurement[];
 }
 

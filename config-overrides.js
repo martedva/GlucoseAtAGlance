@@ -24,7 +24,7 @@ const overridePlugins = (config) => {
   config.plugins.push(
     new CopyWebpackPlugin({
       patterns: [
-        { from: 'assets/icons', to: 'static/assets/icons' },
+        { from: 'assets/icons/*.png', to: 'static/assets/icons/[name][ext]' },
       ],
     })
   );

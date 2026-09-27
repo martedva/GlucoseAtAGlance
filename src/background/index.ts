@@ -27,7 +27,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   switch (request.action) {
     case "GetLibreViewData":
       handleGetLibreViewData(sendResponse);
-      return true; // Keep message channel open for async response
+      return true;
       
     case "GetToken":
       handleGetToken(sendResponse);
@@ -42,7 +42,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       return true;
       
     default:
-      console.warn('Unknown action:', request.action);
       return false;
   }
 });
@@ -59,11 +58,8 @@ async function handleGetLibreViewData(sendResponse: (response: any) => void) {
     const graphData = await getLibreGraph(token.patientId);
     sendResponse(graphData);
   } catch (error: any) {
-    console.error('Error fetching glucose data:', error);
-    
     // Handle 401 Unauthorized - token expired
     if (error?.errorCode === 401) {
-      console.log('Token expired, clearing authentication');
       await authService.logout();
       sendResponse({ error: 'Session expired. Please log in again.' });
       return;
@@ -78,7 +74,6 @@ async function handleGetToken(sendResponse: (response: string | null) => void) {
     const token = await authService.getToken();
     sendResponse(token ? token.token : null);
   } catch (error) {
-    console.error('Error getting token:', error);
     sendResponse(null);
   }
 }
@@ -88,7 +83,6 @@ async function handleLogout(sendResponse: (response: { success: boolean }) => vo
     await authService.logout();
     sendResponse({ success: true });
   } catch (error) {
-    console.error('Error logging out:', error);
     sendResponse({ success: false });
   }
 }
@@ -98,7 +92,6 @@ async function handleCheckAuth(sendResponse: (response: { isAuthenticated: boole
     const isAuthenticated = await authService.isAuthenticated();
     sendResponse({ isAuthenticated });
   } catch (error) {
-    console.error('Error checking auth:', error);
     sendResponse({ isAuthenticated: false });
   }
 }
@@ -120,31 +113,28 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
   try {
     const patientId = await authService.getPatientId();
     if (!patientId) {
-      console.log('[Background] No user logged in, skipping glucose update');
-      return; // Not authenticated, skip update
+      return;
     }
 
     const graphData = await getLibreGraph(patientId);
 
     if (graphData === undefined || !graphData.data) {
-      console.log('[Background] No glucose data available');
       return;
     }
 
-    const color = graphData.data.connection.glucoseItem.MeasurementColor;
-    const arrow = graphData.data.connection.glucoseItem.TrendArrow;
+    const glucoseItem = graphData.data.connection.glucoseItem;
+    const color = glucoseItem.MeasurementColor;
+    const arrow = glucoseItem.TrendArrow;
 
     const icon = `${measurementColorDict[color]}-${trendArrowDict[arrow]}`;
 
     chrome.action.setIcon({
       path: {
-        "16": chrome.runtime.getURL(`static/assets/icons/${icon}.png`),
-        "32": chrome.runtime.getURL(`static/assets/icons/${icon}.png`),
-        "48": chrome.runtime.getURL(`static/assets/icons/${icon}.png`),
-        "128": chrome.runtime.getURL(`static/assets/icons/${icon}.png`)
+        "16": chrome.runtime.getURL(`static/assets/icons/${icon}-16.png`),
+        "48": chrome.runtime.getURL(`static/assets/icons/${icon}-48.png`),
+        "128": chrome.runtime.getURL(`static/assets/icons/${icon}-128.png`)
       }
     });
-    console.log('[Background] Icon updated:', icon);
   } catch (error) {
     console.error('[Background] Error updating icon:', error);
   }

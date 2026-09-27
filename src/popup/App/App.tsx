@@ -51,14 +51,19 @@ function App() {
       const glucoseValue: string = response.data.connection.glucoseItem.Value.toString();
       setGlucose(glucoseValue);
 
-      const appliedDate = new Date(0);
-      appliedDate.setUTCSeconds(1756446638);
-      const endDate = new Date(appliedDate.setDate(appliedDate.getDate() + 14));
+      // Calculate sensor expiry from activation date (sensors last 14 days)
+      const sensor = response.data.connection.sensor;
       
-      const now = new Date();
-      const diffTime = endDate.getTime() - now.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      setDaysToExpire(diffDays);
+      if (sensor?.a) {
+        const activationDate = new Date(sensor.a * 1000);
+        const expiryDate = new Date(activationDate.getTime() + (14 * 24 * 60 * 60 * 1000));
+        const now = new Date();
+        const diffTime = expiryDate.getTime() - now.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        setDaysToExpire(diffDays);
+      } else {
+        setDaysToExpire(undefined);
+      }
 
       const targetLowValue: number = response.data.connection.targetLow / 18.01554;
       setTargetLow(targetLowValue);
@@ -72,7 +77,6 @@ function App() {
       setGraphData(graphDataMapped);
       setError(null);
     } catch (err) {
-      console.error('Error loading glucose data:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to load glucose data';
       setError(errorMessage);
       
@@ -88,7 +92,7 @@ function App() {
       const result = await chrome.storage.local.get(['auth_token', 'patient_id']);
       if (result.auth_token && result.patient_id) {
         setIsAuthenticated(true);
-        loadGlucoseData();
+        await loadGlucoseData();
       } else {
         setIsAuthenticated(false);
       }
@@ -148,7 +152,22 @@ function App() {
     <div className="App" style={{ width: '640px' }}>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px', padding: '20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-          <h3>{glucose} mmol/L</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start' }}>
+            <h3 style={{ margin: 0 }}>{glucose} mmol/L</h3>
+            {daysToExpire !== undefined && (
+              <p 
+                className={`sensor-expiry ${daysToExpire <= 1 ? 'critical' : daysToExpire <= 3 ? 'warning' : ''}`} 
+                style={{ 
+                  margin: 0, 
+                  fontSize: '13px', 
+                  color: daysToExpire <= 1 ? '#d32f2f' : daysToExpire <= 3 ? '#f57c00' : '#666',
+                  fontWeight: daysToExpire <= 3 ? '500' : 'normal'
+                }}
+              >
+                Sensor ends in {daysToExpire} day{daysToExpire !== 1 ? 's' : ''}
+              </p>
+            )}
+          </div>
           <div style={{ display: 'flex', gap: '10px' }}>
             <button onClick={handleRefresh} className="refresh-button">
               Refresh
@@ -168,8 +187,6 @@ function App() {
 
         <DevelopmentGraph graphData={graphData} targetLow={targetLow} targetHigh={targetHigh} />
       </div>
-
-      <p>Sensor ends in {daysToExpire} day(s)</p>
     </div>
   );
 }

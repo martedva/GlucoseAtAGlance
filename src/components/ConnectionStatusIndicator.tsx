@@ -37,7 +37,6 @@ const ConnectionStatusIndicator = memo(function ConnectionStatusIndicator({
             ? `Last updated: ${lastSuccessfulFetch.toLocaleTimeString()}`
             : 'Last update time unknown',
         };
-      case 'online':
       default:
         return {
           bgColor: '#d1fae5',

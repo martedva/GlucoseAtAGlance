@@ -1,5 +1,6 @@
 import * as Plot from '@observablehq/plot';
-import { useEffect, useRef, useMemo, memo } from 'react';
+import { memo, useEffect, useMemo, useRef } from 'react';
+import { predictGlucoseTrend } from '@/utils/trend-prediction';
 import LoadingSkeleton from './LoadingSkeleton';
 
 export interface GraphDataPoint {
@@ -16,7 +17,7 @@ interface DevelopmentGraphProps {
 
 /**
  * Memoized graph component for glucose data visualization
- * Uses Observable Plot for rendering
+ * Uses Observable Plot for rendering with optional trend prediction line
  */
 const DevelopmentGraph = memo(function DevelopmentGraph({
   graphData,
@@ -26,9 +27,12 @@ const DevelopmentGraph = memo(function DevelopmentGraph({
 }: DevelopmentGraphProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Memoize plot configuration
+  // Memoize plot configuration with trend prediction
   const plotConfig = useMemo(() => {
     if (!graphData || graphData.length === 0) return null;
+
+    // Calculate trend prediction for dotted line
+    const trendPrediction = predictGlucoseTrend(graphData);
 
     // Create the plot marks
     // biome-ignore lint/suspicious/noExplicitAny: Plot marks type is not exported by @observablehq/plot
@@ -46,6 +50,52 @@ const DevelopmentGraph = memo(function DevelopmentGraph({
         r: 3.5,
       }),
     ];
+
+    // Add trend prediction dotted line if we have prediction data
+    if (trendPrediction && graphData.length > 0) {
+      const lastPoint = graphData[graphData.length - 1];
+      const lastTime = lastPoint.time.getTime();
+      const fifteenMinLater = new Date(lastTime + 15 * 60 * 1000);
+      const predictedValue = lastPoint.value + trendPrediction.predictedChange15min;
+
+      // Create prediction line data points (from last point to 15 min in future)
+      const predictionData = [
+        { time: lastPoint.time, value: lastPoint.value },
+        { time: fifteenMinLater, value: predictedValue },
+      ];
+
+      marks.push(
+        Plot.line(predictionData, {
+          x: 'time',
+          y: 'value',
+          stroke:
+            trendPrediction.predictedChange > 0.1
+              ? '#f57c00'
+              : trendPrediction.predictedChange < -0.1
+                ? '#1976d2'
+                : '#666',
+          strokeWidth: 2,
+          strokeDasharray: '5,5', // Dotted/dashed line
+          opacity: 0.7,
+        })
+      );
+
+      // Add a dot at the predicted point
+      marks.push(
+        Plot.dot(predictionData.slice(-1), {
+          x: 'time',
+          y: 'value',
+          fill:
+            trendPrediction.predictedChange > 0.1
+              ? '#f57c00'
+              : trendPrediction.predictedChange < -0.1
+                ? '#1976d2'
+                : '#666',
+          r: 4,
+          opacity: 0.7,
+        })
+      );
+    }
 
     // Add target range rectangle if targets are defined
     if (targetLow !== undefined && targetHigh !== undefined) {
@@ -90,7 +140,10 @@ const DevelopmentGraph = memo(function DevelopmentGraph({
     const svg = plot.querySelector('svg');
     if (svg) {
       svg.setAttribute('role', 'img');
-      svg.setAttribute('aria-label', 'Glucose level graph showing readings over time');
+      svg.setAttribute(
+        'aria-label',
+        'Glucose level graph showing readings over time with trend prediction'
+      );
 
       // Add title and description for screen readers
       const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
@@ -134,7 +187,11 @@ const DevelopmentGraph = memo(function DevelopmentGraph({
   }
 
   return (
-    <div className="graph-container" role="figure" aria-label="Glucose level chart">
+    <div
+      className="graph-container"
+      role="figure"
+      aria-label="Glucose level chart with trend prediction"
+    >
       <div ref={containerRef} className="graph" />
     </div>
   );

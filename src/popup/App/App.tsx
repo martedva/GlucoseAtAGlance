@@ -6,7 +6,7 @@ import GlucoseDisplay from '@/components/GlucoseDisplay';
 import LoginForm from '@/components/LoginForm';
 import SettingsPanel, { type UserPreferences } from '@/components/SettingsPanel';
 import { SENSOR_CONFIG, UI_CONFIG } from '@/config';
-import { useAuth, useGlucoseData, usePreferences, useConnectionStatus } from '@/hooks';
+import { useAuth, useConnectionStatus, useGlucoseData, usePreferences } from '@/hooks';
 import { useSensorExpiry } from '@/hooks/useSensorExpiry';
 import { parseLibreTimestamp } from '@/types/api';
 import './App.css';
@@ -44,9 +44,12 @@ function App() {
   useEffect(() => {
     if (!isAuthenticated || !data) return;
 
-    const interval = setInterval(() => {
-      fetchData();
-    }, preferences.refreshInterval * 60 * 1000);
+    const interval = setInterval(
+      () => {
+        fetchData();
+      },
+      preferences.refreshInterval * 60 * 1000
+    );
 
     return () => clearInterval(interval);
   }, [isAuthenticated, data, fetchData, preferences.refreshInterval]);
@@ -182,12 +185,7 @@ function App() {
           </div>
 
           {error && (
-            <div
-              className="error-message"
-              role="alert"
-              aria-live="assertive"
-              aria-atomic="true"
-            >
+            <div className="error-message" role="alert" aria-live="assertive" aria-atomic="true">
               {error}
               <button
                 type="button"

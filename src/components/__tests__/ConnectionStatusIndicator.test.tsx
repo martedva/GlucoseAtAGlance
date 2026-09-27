@@ -4,9 +4,7 @@ import ConnectionStatusIndicator from '../ConnectionStatusIndicator';
 describe('ConnectionStatusIndicator', () => {
   it('should show online status with green styling', () => {
     const lastFetch = new Date('2024-01-01T10:00:00');
-    render(
-      <ConnectionStatusIndicator status="online" lastSuccessfulFetch={lastFetch} />
-    );
+    render(<ConnectionStatusIndicator status="online" lastSuccessfulFetch={lastFetch} />);
 
     expect(screen.getByText('Live data')).toBeInTheDocument();
     expect(screen.getByText(/Updated:/)).toBeInTheDocument();
@@ -14,9 +12,7 @@ describe('ConnectionStatusIndicator', () => {
   });
 
   it('should show offline status with red styling', () => {
-    render(
-      <ConnectionStatusIndicator status="offline" lastSuccessfulFetch={null} />
-    );
+    render(<ConnectionStatusIndicator status="offline" lastSuccessfulFetch={null} />);
 
     expect(screen.getByText('No connection')).toBeInTheDocument();
     expect(screen.getByText('Unable to fetch latest data')).toBeInTheDocument();
@@ -25,9 +21,7 @@ describe('ConnectionStatusIndicator', () => {
 
   it('should show stale status with warning styling', () => {
     const lastFetch = new Date('2024-01-01T08:00:00');
-    render(
-      <ConnectionStatusIndicator status="stale" lastSuccessfulFetch={lastFetch} />
-    );
+    render(<ConnectionStatusIndicator status="stale" lastSuccessfulFetch={lastFetch} />);
 
     expect(screen.getByText('Data may be outdated')).toBeInTheDocument();
     expect(screen.getByText(/Last updated:/)).toBeInTheDocument();
@@ -35,9 +29,7 @@ describe('ConnectionStatusIndicator', () => {
   });
 
   it('should show "Just now" when online with no last fetch time', () => {
-    render(
-      <ConnectionStatusIndicator status="online" lastSuccessfulFetch={null} />
-    );
+    render(<ConnectionStatusIndicator status="online" lastSuccessfulFetch={null} />);
 
     expect(screen.getByText('Just now')).toBeInTheDocument();
   });
@@ -56,9 +48,7 @@ describe('ConnectionStatusIndicator', () => {
 
   it('should format last fetch time correctly', () => {
     const lastFetch = new Date('2024-01-01T10:30:00');
-    render(
-      <ConnectionStatusIndicator status="stale" lastSuccessfulFetch={lastFetch} />
-    );
+    render(<ConnectionStatusIndicator status="stale" lastSuccessfulFetch={lastFetch} />);
 
     // Should show the time in local format
     expect(screen.getByText(/Last updated:.*10:30/)).toBeInTheDocument();

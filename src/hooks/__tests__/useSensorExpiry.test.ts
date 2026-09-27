@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react';
-import { useSensorExpiry } from '../useSensorExpiry';
 import type { SensorData } from '@/types/api';
+import { useSensorExpiry } from '../useSensorExpiry';
 
 describe('useSensorExpiry', () => {
   it('should return unknown status when no sensor data', () => {

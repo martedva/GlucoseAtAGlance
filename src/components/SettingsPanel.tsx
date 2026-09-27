@@ -1,4 +1,4 @@
-import { useState, useEffect, memo } from 'react';
+import { memo, useEffect, useState } from 'react';
 
 interface UserPreferences {
   refreshInterval: number; // minutes
@@ -27,9 +27,7 @@ const SettingsPanel = memo(function SettingsPanel({
     setLocalPrefs(preferences);
   }, [preferences]);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setLocalPrefs((prev) => ({
       ...prev,

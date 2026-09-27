@@ -68,7 +68,7 @@ describe('ErrorBoundary', () => {
   it('should allow retry after error', () => {
     const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
-    let shouldThrow = true;
+    const shouldThrow = true;
     const ConditionalThrow = () => {
       if (shouldThrow) {
         throw new Error('Test error');

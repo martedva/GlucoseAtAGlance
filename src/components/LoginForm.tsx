@@ -71,22 +71,12 @@ const LoginForm = ({ onLoginSuccess, onError }: LoginFormProps) => {
           </div>
 
           {error && (
-            <div
-              className="error-message"
-              role="alert"
-              aria-live="assertive"
-              aria-atomic="true"
-            >
+            <div className="error-message" role="alert" aria-live="assertive" aria-atomic="true">
               {error}
             </div>
           )}
 
-          <button
-            type="submit"
-            className="login-button"
-            disabled={isLoading}
-            aria-busy={isLoading}
-          >
+          <button type="submit" className="login-button" disabled={isLoading} aria-busy={isLoading}>
             {isLoading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>

@@ -88,16 +88,22 @@ describe('GlucoseDisplay', () => {
     expect(heading).toHaveAttribute('aria-atomic', 'true');
   });
 
-  it('should show trend prediction when graph data is provided', () => {
+  it('should show trend prediction with predicted glucose value', () => {
     render(<GlucoseDisplay {...defaultProps} glucose={6.0} graphData={mockGraphData} />);
 
-    // Should show trend description (rising or stable depending on calculation)
-    expect(screen.queryByText(/rising|stable|falling/)).toBeInTheDocument();
+    // Should show predicted glucose value in 15 min
+    expect(screen.getByText(/mmol\/L in 15 min/)).toBeInTheDocument();
+  });
+
+  it('should show trend direction (rising/falling/stable)', () => {
+    render(<GlucoseDisplay {...defaultProps} glucose={6.0} graphData={mockGraphData} />);
+
+    expect(screen.queryByText(/rising|falling|stable/)).toBeInTheDocument();
   });
 
   it('should not show trend when no graph data', () => {
     render(<GlucoseDisplay {...defaultProps} glucose={6.0} graphData={[]} />);
 
-    expect(screen.queryByText(/rising|stable|falling/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/mmol\/L in 15 min/)).not.toBeInTheDocument();
   });
 });

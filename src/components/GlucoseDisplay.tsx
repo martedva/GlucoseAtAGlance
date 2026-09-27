@@ -1,6 +1,10 @@
 import { memo } from 'react';
 import type { SensorExpiryStatus } from '@/hooks/useSensorExpiry';
-import { predictGlucoseTrend, getTrendArrowFromPrediction, getTrendDescription } from '@/utils/trend-prediction';
+import {
+  getTrendArrowFromPrediction,
+  getTrendDescription,
+  predictGlucoseTrend,
+} from '@/utils/trend-prediction';
 
 interface GraphDataPoint {
   time: Date;
@@ -49,12 +53,16 @@ const GlucoseDisplay = memo(function GlucoseDisplay({
   const expiryStyles = getExpiryStyles(sensorStatus);
 
   // Calculate trend prediction from graph data
-  const trendPrediction = graphData && graphData.length > 0
-    ? predictGlucoseTrend(graphData)
+  const trendPrediction = graphData && graphData.length > 0 ? predictGlucoseTrend(graphData) : null;
+
+  const trendArrow = trendPrediction
+    ? getTrendArrowFromPrediction(trendPrediction.predictedChange)
     : null;
 
-  const trendArrow = trendPrediction ? getTrendArrowFromPrediction(trendPrediction.predictedChange) : null;
-  const trendDescription = trendPrediction ? getTrendDescription(trendPrediction) : null;
+  // Calculate predicted glucose value in 15 minutes
+  const predictedGlucose15min = trendPrediction
+    ? (glucose ?? 0) + trendPrediction.predictedChange15min
+    : null;
 
   return (
     <div
@@ -74,8 +82,16 @@ const GlucoseDisplay = memo(function GlucoseDisplay({
         {trendArrow && (
           <span
             style={{ fontSize: '20px' }}
-            aria-label={`Glucose trend: ${trendDescription}`}
-            title={trendDescription || undefined}
+            aria-label={`Glucose trend: ${
+              trendPrediction?.predictedChange15min
+                ? `${trendPrediction.predictedChange15min > 0 ? 'rising' : 'falling'} to ${(glucose ?? 0) + trendPrediction.predictedChange15min} mmol/L`
+                : 'stable'
+            }`}
+            title={
+              trendPrediction
+                ? `Predicted: ${predictedGlucose15min?.toFixed(1)} mmol/L in 15 min`
+                : undefined
+            }
           >
             {trendArrow}
           </span>
@@ -94,18 +110,27 @@ const GlucoseDisplay = memo(function GlucoseDisplay({
           Sensor ends in {daysToExpire} day{daysToExpire !== 1 ? 's' : ''}
         </p>
       )}
-      {trendPrediction && (
+      {trendPrediction && predictedGlucose15min !== null && (
         <p
           style={{
             margin: 0,
             fontSize: '12px',
-            color: trendPrediction.predictedChange > 0.1 ? '#f57c00' :
-                   trendPrediction.predictedChange < -0.1 ? '#1976d2' : '#666',
+            color:
+              trendPrediction.predictedChange > 0.1
+                ? '#f57c00'
+                : trendPrediction.predictedChange < -0.1
+                  ? '#1976d2'
+                  : '#666',
           }}
-          aria-label={`Predicted change: ${trendDescription}`}
+          aria-label={`Predicted glucose: ${predictedGlucose15min.toFixed(1)} mmol/L in 15 minutes`}
         >
           {trendPrediction.confidence === 'high' && '↑ '}
-          {trendDescription}
+          {trendPrediction.predictedChange15min > 0
+            ? 'rising'
+            : trendPrediction.predictedChange15min < 0
+              ? 'falling'
+              : 'stable'}
+          ({predictedGlucose15min.toFixed(1)} mmol/L in 15 min)
         </p>
       )}
     </div>

@@ -56,12 +56,14 @@ export const getMockCalls = (): {
       sendMessage: Array<{ message: unknown }>;
     }
   >;
-  return globals.getMockCalls?.() || {
-    get: [],
-    set: [],
-    remove: [],
-    sendMessage: [],
-  };
+  return (
+    globals.getMockCalls?.() || {
+      get: [],
+      set: [],
+      remove: [],
+      sendMessage: [],
+    }
+  );
 };
 
 /**
@@ -82,10 +84,12 @@ export const getMockFunctions = (): {
       sendMessage: jest.MockedFunction<typeof chrome.runtime.sendMessage>;
     }
   >;
-  return globals.getMockFunctions?.() || {
-    get: jest.fn(),
-    set: jest.fn(),
-    remove: jest.fn(),
-    sendMessage: jest.fn(),
-  };
+  return (
+    globals.getMockFunctions?.() || {
+      get: jest.fn(),
+      set: jest.fn(),
+      remove: jest.fn(),
+      sendMessage: jest.fn(),
+    }
+  );
 };

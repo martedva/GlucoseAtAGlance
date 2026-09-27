@@ -1,4 +1,8 @@
-import { predictGlucoseTrend, getTrendArrowFromPrediction, getTrendDescription } from '../trend-prediction';
+import {
+  getTrendArrowFromPrediction,
+  getTrendDescription,
+  predictGlucoseTrend,
+} from '../trend-prediction';
 
 describe('Trend Prediction', () => {
   describe('predictGlucoseTrend', () => {

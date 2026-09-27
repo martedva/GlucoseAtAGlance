@@ -1,12 +1,12 @@
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { useStorage, useAuth } from '../useStorage';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import {
   cleanupChromeMocks,
-  getMockChromeStorage,
-  setStorageData,
-  getStorageData,
   getMockCalls,
+  getMockChromeStorage,
+  getStorageData,
+  setStorageData,
 } from '../../test-utils';
+import { useAuth, useStorage } from '../useStorage';
 
 // TODO: Fix these tests - chrome.storage mock timing issue
 // The hooks are tested indirectly through component tests

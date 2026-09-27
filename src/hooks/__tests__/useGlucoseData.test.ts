@@ -1,7 +1,7 @@
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { useGlucoseData } from '../useGlucoseData';
-import { cleanupChromeMocks, getMockChromeRuntime } from '../../test-utils';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import type { LibreViewResponse } from '@/types/api';
+import { cleanupChromeMocks, getMockChromeRuntime } from '../../test-utils';
+import { useGlucoseData } from '../useGlucoseData';
 
 const mockGlucoseData: LibreViewResponse['data'] = {
   connection: {

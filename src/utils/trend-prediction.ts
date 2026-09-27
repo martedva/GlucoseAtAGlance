@@ -57,7 +57,7 @@ function calculateConfidence(data: DataPoint[], slope: number): 'low' | 'medium'
   // Check data consistency (standard deviation)
   const values = data.map((d) => d.value);
   const mean = values.reduce((a, b) => a + b, 0) / values.length;
-  const variance = values.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / values.length;
+  const variance = values.reduce((a, b) => a + (b - mean) ** 2, 0) / values.length;
   const stdDev = Math.sqrt(variance);
 
   // High variance = low confidence

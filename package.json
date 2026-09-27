@@ -6,7 +6,6 @@
     "@observablehq/plot": "^0.6.17",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^13.0.0",
-    "@testing-library/user-event": "^13.2.1",
     "@types/jest": "^27.0.1",
     "@types/node": "^16.7.13",
     "@types/react": "^18.0.0",
@@ -30,6 +29,16 @@
     "format": "biome format --write ."
   },
   "eslintConfig": {},
+  "jest": {
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/src/$1",
+      "^@api/(.*)$": "<rootDir>/src/api/$1",
+      "^@components/(.*)$": "<rootDir>/src/components/$1",
+      "^@hooks/(.*)$": "<rootDir>/src/hooks/$1",
+      "^@types/(.*)$": "<rootDir>/src/types/$1",
+      "^@config/(.*)$": "<rootDir>/src/config/$1"
+    }
+  },
   "browserslist": {
     "production": [
       ">0.2%",
@@ -44,6 +53,8 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/user-event": "^14.6.7",
     "@types/chrome": "^0.0.248",
     "@types/webextension-polyfill": "^0.10.5",
     "@typescript-eslint/eslint-plugin": "^8.70.1",

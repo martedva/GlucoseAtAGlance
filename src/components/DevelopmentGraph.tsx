@@ -81,6 +81,25 @@ const DevelopmentGraph = ({
       },
     });
 
+    // Add accessibility attributes to the SVG
+    const svg = plot.querySelector('svg');
+    if (svg) {
+      svg.setAttribute('role', 'img');
+      svg.setAttribute('aria-label', 'Glucose level graph showing readings over time');
+
+      // Add title and description for screen readers
+      const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+      title.textContent = 'Glucose Level Graph';
+      svg.insertBefore(title, svg.firstChild);
+
+      const desc = document.createElementNS('http://www.w3.org/2000/svg', 'desc');
+      const dataPoints = graphData.length;
+      const avgValue =
+        graphData.reduce((sum, d) => sum + d.value, 0) / dataPoints;
+      desc.textContent = `Graph showing ${dataPoints} glucose readings. Average: ${avgValue.toFixed(1)} mmol/L`;
+      svg.insertBefore(desc, title.nextSibling);
+    }
+
     // Clear previous content and append new plot
     const container = containerRef.current;
     container.innerHTML = '';
@@ -96,7 +115,7 @@ const DevelopmentGraph = ({
 
   if (isLoading) {
     return (
-      <div className="graph-container">
+      <div className="graph-container" role="status" aria-label="Loading graph">
         <LoadingSkeleton width="100%" height="400px" className="graph-skeleton" />
       </div>
     );
@@ -104,14 +123,14 @@ const DevelopmentGraph = ({
 
   if (!graphData || graphData.length === 0) {
     return (
-      <div className="graph-container">
+      <div className="graph-container" role="status">
         <p style={{ textAlign: 'center', color: '#666' }}>No glucose data available</p>
       </div>
     );
   }
 
   return (
-    <div className="graph-container">
+    <div className="graph-container" role="figure" aria-label="Glucose level chart">
       <div ref={containerRef} className="graph" />
     </div>
   );

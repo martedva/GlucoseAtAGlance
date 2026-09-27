@@ -1,5 +1,6 @@
 import { useCallback, useEffect } from 'react';
 import DevelopmentGraph from '@/components/DevelopmentGraph';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import GlucoseDisplay from '@/components/GlucoseDisplay';
 import LoginForm from '@/components/LoginForm';
 import { SENSOR_CONFIG, UI_CONFIG } from '@/config';
@@ -39,59 +40,75 @@ function App() {
   if (!isAuthenticated) {
     return (
       <div className="App" style={{ width: `${UI_CONFIG.POPUP_WIDTH}px` }}>
-        <LoginForm onLoginSuccess={handleLoginSuccess} onError={() => {}} />
+        <ErrorBoundary>
+          <LoginForm onLoginSuccess={handleLoginSuccess} onError={() => {}} />
+        </ErrorBoundary>
       </div>
     );
   }
 
   return (
     <div className="App" style={{ width: `${UI_CONFIG.POPUP_WIDTH}px` }}>
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '20px',
-          padding: '20px',
-        }}
-      >
-        <GlucoseDisplay
-          glucose={data?.data.connection.glucoseItem.Value}
-          daysToExpire={daysToExpire}
-          sensorStatus={sensorStatus}
-          onRefresh={handleRefresh}
-          onLogout={logout}
-        />
+      <ErrorBoundary>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '20px',
+            padding: '20px',
+          }}
+          role="main"
+          aria-label="Glucose monitoring dashboard"
+        >
+          <GlucoseDisplay
+            glucose={data?.data.connection.glucoseItem.Value}
+            daysToExpire={daysToExpire}
+            sensorStatus={sensorStatus}
+            onRefresh={handleRefresh}
+            onLogout={logout}
+          />
 
-        {error && (
-          <div className="error-message" role="alert">
-            {error}
-            <button onClick={handleRefresh} className="retry-button">
-              Retry
-            </button>
-          </div>
-        )}
+          {error && (
+            <div
+              className="error-message"
+              role="alert"
+              aria-live="assertive"
+              aria-atomic="true"
+            >
+              {error}
+              <button
+                type="button"
+                onClick={handleRefresh}
+                className="retry-button"
+                aria-label="Retry loading glucose data"
+              >
+                Retry
+              </button>
+            </div>
+          )}
 
-        <DevelopmentGraph
-          graphData={
-            data?.data.graphData.map((item) => ({
-              time: item.Timestamp,
-              value: item.Value,
-            })) ?? []
-          }
-          targetLow={
-            data?.data.connection.targetLow
-              ? data.data.connection.targetLow / SENSOR_CONFIG.MMOL_TO_MGDL_FACTOR
-              : undefined
-          }
-          targetHigh={
-            data?.data.connection.targetHigh
-              ? data.data.connection.targetHigh / SENSOR_CONFIG.MMOL_TO_MGDL_FACTOR
-              : undefined
-          }
-          isLoading={isDataLoading}
-        />
-      </div>
+          <DevelopmentGraph
+            graphData={
+              data?.data.graphData.map((item) => ({
+                time: item.Timestamp,
+                value: item.Value,
+              })) ?? []
+            }
+            targetLow={
+              data?.data.connection.targetLow
+                ? data.data.connection.targetLow / SENSOR_CONFIG.MMOL_TO_MGDL_FACTOR
+                : undefined
+            }
+            targetHigh={
+              data?.data.connection.targetHigh
+                ? data.data.connection.targetHigh / SENSOR_CONFIG.MMOL_TO_MGDL_FACTOR
+                : undefined
+            }
+            isLoading={isDataLoading}
+          />
+        </div>
+      </ErrorBoundary>
     </div>
   );
 }

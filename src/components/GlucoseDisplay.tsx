@@ -19,6 +19,17 @@ const getExpiryStyles = (status: SensorExpiryStatus) => {
   }
 };
 
+const getSensorStatusLabel = (status: SensorExpiryStatus): string => {
+  switch (status) {
+    case 'critical':
+      return 'Critical - sensor expiring soon';
+    case 'warning':
+      return 'Warning - sensor expiring in a few days';
+    default:
+      return 'Normal - sensor operating normally';
+  }
+};
+
 const GlucoseDisplay = ({
   glucose,
   daysToExpire,
@@ -36,11 +47,15 @@ const GlucoseDisplay = ({
         alignItems: 'center',
         width: '100%',
       }}
+      role="region"
+      aria-label="Glucose monitoring dashboard"
     >
       <div
         style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start' }}
       >
-        <h3 style={{ margin: 0 }}>{glucose?.toFixed(1) ?? '--'} mmol/L</h3>
+        <h3 style={{ margin: 0 }} aria-live="polite" aria-atomic="true">
+          {glucose?.toFixed(1) ?? '--'} mmol/L
+        </h3>
         {daysToExpire !== null && (
           <p
             className={`sensor-expiry ${sensorStatus}`}
@@ -49,16 +64,27 @@ const GlucoseDisplay = ({
               fontSize: '13px',
               ...expiryStyles,
             }}
+            aria-label={`Sensor expiry: ${getSensorStatusLabel(sensorStatus)}, ${daysToExpire} day${daysToExpire !== 1 ? 's' : ''} remaining`}
           >
             Sensor ends in {daysToExpire} day{daysToExpire !== 1 ? 's' : ''}
           </p>
         )}
       </div>
-      <div style={{ display: 'flex', gap: '10px' }}>
-        <button onClick={onRefresh} className="refresh-button">
+      <div style={{ display: 'flex', gap: '10px' }} role="group" aria-label="Actions">
+        <button
+          type="button"
+          onClick={onRefresh}
+          className="refresh-button"
+          aria-label="Refresh glucose data"
+        >
           Refresh
         </button>
-        <button onClick={onLogout} className="logout-button">
+        <button
+          type="button"
+          onClick={onLogout}
+          className="logout-button"
+          aria-label="Log out of account"
+        >
           Logout
         </button>
       </div>

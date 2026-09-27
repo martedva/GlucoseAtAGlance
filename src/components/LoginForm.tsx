@@ -32,12 +32,12 @@ const LoginForm = ({ onLoginSuccess, onError }: LoginFormProps) => {
   };
 
   return (
-    <div className="login-form-container">
+    <div className="login-form-container" role="main" aria-label="Login form">
       <div className="login-form-wrapper">
         <h2 className="login-title">Glucose At A Glance</h2>
         <p className="login-subtitle">Sign in with your LibreLinkUp account</p>
 
-        <form onSubmit={handleSubmit} className="login-form">
+        <form onSubmit={handleSubmit} className="login-form" aria-describedby="login-help">
           <div className="form-group">
             <label htmlFor="email">Email</label>
             <input
@@ -49,6 +49,8 @@ const LoginForm = ({ onLoginSuccess, onError }: LoginFormProps) => {
               required
               disabled={isLoading}
               autoComplete="username"
+              aria-required="true"
+              aria-invalid={!!error}
             />
           </div>
 
@@ -63,21 +65,33 @@ const LoginForm = ({ onLoginSuccess, onError }: LoginFormProps) => {
               required
               disabled={isLoading}
               autoComplete="current-password"
+              aria-required="true"
+              aria-invalid={!!error}
             />
           </div>
 
           {error && (
-            <div className="error-message" role="alert">
+            <div
+              className="error-message"
+              role="alert"
+              aria-live="assertive"
+              aria-atomic="true"
+            >
               {error}
             </div>
           )}
 
-          <button type="submit" className="login-button" disabled={isLoading}>
+          <button
+            type="submit"
+            className="login-button"
+            disabled={isLoading}
+            aria-busy={isLoading}
+          >
             {isLoading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
 
-        <p className="login-help">
+        <p id="login-help" className="login-help">
           Your credentials are stored locally and never sent to third parties.
         </p>
       </div>

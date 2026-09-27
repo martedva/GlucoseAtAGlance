@@ -6,7 +6,13 @@ import GlucoseDisplay from '@/components/GlucoseDisplay';
 import LoginForm from '@/components/LoginForm';
 import SettingsPanel, { type UserPreferences } from '@/components/SettingsPanel';
 import { SENSOR_CONFIG, UI_CONFIG } from '@/config';
-import { useAuth, useConnectionStatus, useGlucoseData, usePreferences } from '@/hooks';
+import {
+  useAuth,
+  useConnectionStatus,
+  useGlucoseData,
+  useKeyboardShortcuts,
+  usePreferences,
+} from '@/hooks';
 import { useSensorExpiry } from '@/hooks/useSensorExpiry';
 import { parseLibreTimestamp } from '@/types/api';
 import './App.css';
@@ -33,6 +39,26 @@ function App() {
   const handleRefresh = useCallback(() => {
     fetchData();
   }, [fetchData]);
+
+  // Update extension icon when fresh data is loaded
+  useEffect(() => {
+    if (!data?.data?.connection?.glucoseItem) return;
+
+    const glucoseItem = data.data.connection.glucoseItem;
+    const colorMap: Record<number, string> = { 1: 'green', 2: 'yellow', 3: 'orange', 4: 'red' };
+    const arrowMap: Record<number, string> = { 1: 'down', 2: 'right-down', 3: 'right', 4: 'right-up', 5: 'up' };
+    
+    const color = colorMap[glucoseItem.MeasurementColor];
+    const arrow = arrowMap[glucoseItem.TrendArrow];
+
+    if (color && arrow) {
+      chrome.runtime.sendMessage({
+        action: 'UpdateIcon',
+        color,
+        arrow,
+      });
+    }
+  }, [data?.data?.connection?.glucoseItem]);
 
   useEffect(() => {
     if (isAuthenticated && !data) {
@@ -82,6 +108,12 @@ function App() {
     [data?.data.connection.glucoseItem.Value]
   );
 
+  // Memoize trend arrow from API
+  const currentTrendArrow = useMemo(
+    () => data?.data.connection.glucoseItem.TrendArrow,
+    [data?.data.connection.glucoseItem.TrendArrow]
+  );
+
   const handleOpenSettings = useCallback(() => {
     setIsSettingsOpen(true);
   }, []);
@@ -96,6 +128,46 @@ function App() {
     },
     [savePreferences]
   );
+
+  // Test notification handler - sends to background script for system notification
+  const handleTestNotification = useCallback((type: 'low' | 'high') => {
+    const testValues = {
+      low: { value: 3.5, threshold: 4.0 },
+      high: { value: 12.0, threshold: 10.0 },
+    };
+
+    const test = testValues[type];
+    const title = type === 'low' ? '⚠️ Low Glucose Alert' : '⚠️ High Glucose Alert';
+    const body =
+      type === 'low'
+        ? `Your glucose is ${test.value.toFixed(1)} mmol/L (below ${test.threshold.toFixed(1)} mmol/L)`
+        : `Your glucose is ${test.value.toFixed(1)} mmol/L (above ${test.threshold.toFixed(1)} mmol/L)`;
+
+    chrome.runtime.sendMessage(
+      {
+        action: 'ShowNotification',
+        title,
+        body,
+        type: 'warning' as const,
+      },
+      (response) => {
+        if (chrome.runtime.lastError) {
+          console.error('[Test Notification] Error:', chrome.runtime.lastError.message);
+        }
+      }
+    );
+  }, []);
+
+  // Keyboard shortcuts for accessibility
+  useKeyboardShortcuts({
+    onRefresh: handleRefresh,
+    onOpenSettings: handleOpenSettings,
+    onLogout: logout,
+    onCloseSettings: handleCloseSettings,
+    isRefreshing: isDataLoading,
+    isSettingsOpen,
+    isAuthenticated,
+  });
 
   if (!isAuthLoaded || isPrefsLoading) {
     return (
@@ -152,14 +224,16 @@ function App() {
               daysToExpire={daysToExpire}
               sensorStatus={sensorStatus}
               graphData={graphData}
+              currentTrendArrow={currentTrendArrow}
             />
             <div style={{ display: 'flex', gap: '8px' }} role="group" aria-label="Actions">
               <button
                 type="button"
                 onClick={handleRefresh}
                 className="action-button"
-                aria-label="Refresh glucose data"
-                title="Refresh"
+                aria-label="Refresh glucose data (Ctrl+R)"
+                title="Refresh (Ctrl+R)"
+                disabled={isDataLoading}
               >
                 🔄
               </button>
@@ -167,8 +241,8 @@ function App() {
                 type="button"
                 onClick={handleOpenSettings}
                 className="action-button"
-                aria-label="Open settings"
-                title="Settings"
+                aria-label="Open settings (Ctrl+S)"
+                title="Settings (Ctrl+S)"
               >
                 ⚙️
               </button>
@@ -176,8 +250,8 @@ function App() {
                 type="button"
                 onClick={logout}
                 className="action-button"
-                aria-label="Log out of account"
-                title="Log out"
+                aria-label="Log out of account (Ctrl+L)"
+                title="Log out (Ctrl+L)"
               >
                 ↗️
               </button>
@@ -192,6 +266,7 @@ function App() {
                 onClick={handleRefresh}
                 className="retry-button"
                 aria-label="Retry loading glucose data"
+                disabled={isDataLoading}
               >
                 Retry
               </button>
@@ -204,6 +279,11 @@ function App() {
             targetHigh={targetHigh}
             isLoading={isDataLoading}
           />
+
+          {/* Keyboard shortcuts hint */}
+          <p className="keyboard-hint" aria-hidden="true">
+            Shortcuts: Ctrl+R Refresh • Ctrl+S Settings • Ctrl+L Logout
+          </p>
         </div>
       </ErrorBoundary>
 
@@ -212,6 +292,7 @@ function App() {
         onClose={handleCloseSettings}
         preferences={preferences}
         onSavePreferences={handleSavePreferences}
+        onTestNotification={handleTestNotification}
       />
     </div>
   );

@@ -9,7 +9,7 @@ export interface TrendPrediction {
   predictedChange15min: number; // predicted change in 15 minutes
   predictedChange30min: number; // predicted change in 30 minutes
   predictedChange60min: number; // predicted change in 60 minutes
-  confidence: 'low' | 'medium' | 'high';
+  confidence: "low" | "medium" | "high";
 }
 
 interface DataPoint {
@@ -50,29 +50,33 @@ function calculateSlope(data: DataPoint[]): number {
 /**
  * Calculate prediction confidence based on data quality
  */
-function calculateConfidence(data: DataPoint[], slope: number): 'low' | 'medium' | 'high' {
+function calculateConfidence(
+  data: DataPoint[],
+  _slope: number,
+): "low" | "medium" | "high" {
   // Need minimum data points
-  if (data.length < 3) return 'low';
+  if (data.length < 3) return "low";
 
   // Check data consistency (standard deviation)
   const values = data.map((d) => d.value);
   const mean = values.reduce((a, b) => a + b, 0) / values.length;
-  const variance = values.reduce((a, b) => a + (b - mean) ** 2, 0) / values.length;
+  const variance =
+    values.reduce((a, b) => a + (b - mean) ** 2, 0) / values.length;
   const stdDev = Math.sqrt(variance);
 
   // High variance = low confidence
-  if (stdDev > 3) return 'low';
-  if (stdDev > 1.5) return 'medium';
+  if (stdDev > 3) return "low";
+  if (stdDev > 1.5) return "medium";
 
   // Check if we have recent data (last 30 minutes)
   const now = Date.now();
   const thirtyMinAgo = now - 30 * 60 * 1000;
   const recentPoints = data.filter((d) => d.time.getTime() > thirtyMinAgo);
 
-  if (recentPoints.length < 2) return 'low';
-  if (recentPoints.length < 4) return 'medium';
+  if (recentPoints.length < 2) return "low";
+  if (recentPoints.length < 4) return "medium";
 
-  return 'high';
+  return "high";
 }
 
 /**
@@ -83,7 +87,7 @@ function calculateConfidence(data: DataPoint[], slope: number): 'low' | 'medium'
  */
 export function predictGlucoseTrend(
   data: Array<{ time: Date; value: number }>,
-  lookbackMinutes: number = 60
+  lookbackMinutes: number = 60,
 ): TrendPrediction | null {
   if (!data || data.length < 2) {
     return null;
@@ -126,29 +130,16 @@ export function predictGlucoseTrend(
 }
 
 /**
- * Get trend arrow based on predicted change
- * @param changePerMinute - Rate of change in mmol/L per minute
- * @returns Arrow emoji representing trend direction
- */
-export function getTrendArrowFromPrediction(changePerMinute: number): string {
-  if (changePerMinute > 0.3) return '↗️'; // Rising fast
-  if (changePerMinute > 0.1) return '↑'; // Rising
-  if (changePerMinute < -0.3) return '↘️'; // Falling fast
-  if (changePerMinute < -0.1) return '↓'; // Falling
-  return '→'; // Stable
-}
-
-/**
  * Get trend description text
  */
 export function getTrendDescription(prediction: TrendPrediction): string {
-  const { predictedChange15min, confidence } = prediction;
+  const { predictedChange15min } = prediction;
 
   if (Math.abs(predictedChange15min) < 0.5) {
-    return 'Stable';
+    return "Stable";
   }
 
-  const direction = predictedChange15min > 0 ? 'rising' : 'falling';
+  const direction = predictedChange15min > 0 ? "rising" : "falling";
   const magnitude = Math.abs(predictedChange15min).toFixed(1);
 
   return `${direction} (${magnitude} mmol/L in 15 min)`;

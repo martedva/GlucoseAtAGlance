@@ -88,22 +88,25 @@ describe('GlucoseDisplay', () => {
     expect(heading).toHaveAttribute('aria-atomic', 'true');
   });
 
-  it('should show trend prediction with predicted glucose value', () => {
-    render(<GlucoseDisplay {...defaultProps} glucose={6.0} graphData={mockGraphData} />);
+  it('should show trend arrow from API when currentTrendArrow is provided', () => {
+    render(<GlucoseDisplay {...defaultProps} glucose={6.0} currentTrendArrow={4} />);
 
-    // Should show predicted glucose value in 15 min
-    expect(screen.getByText(/mmol\/L in 15 min/)).toBeInTheDocument();
+    // Should show trend arrow (↗️ for rising)
+    expect(screen.getByText('↗️')).toBeInTheDocument();
   });
 
-  it('should show trend direction (rising/falling/stable)', () => {
-    render(<GlucoseDisplay {...defaultProps} glucose={6.0} graphData={mockGraphData} />);
+  it('should show trend description with API trend arrow', () => {
+    render(<GlucoseDisplay {...defaultProps} glucose={6.0} currentTrendArrow={4} />);
 
-    expect(screen.queryByText(/rising|falling|stable/)).toBeInTheDocument();
+    // Should show trend description "Rising" (capitalized)
+    expect(screen.getByText(/Rising/)).toBeInTheDocument();
   });
 
-  it('should not show trend when no graph data', () => {
-    render(<GlucoseDisplay {...defaultProps} glucose={6.0} graphData={[]} />);
+  it('should not show trend arrow when currentTrendArrow is undefined', () => {
+    render(<GlucoseDisplay {...defaultProps} glucose={6.0} currentTrendArrow={undefined} />);
 
-    expect(screen.queryByText(/mmol\/L in 15 min/)).not.toBeInTheDocument();
+    expect(screen.queryByText('↗️')).not.toBeInTheDocument();
+    expect(screen.queryByText('↓')).not.toBeInTheDocument();
+    expect(screen.queryByText('→')).not.toBeInTheDocument();
   });
 });

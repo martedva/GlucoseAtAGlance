@@ -62,7 +62,7 @@ export const ICON_CONFIG = {
 // Alarm Configuration
 export const ALARM_CONFIG = {
   NAME: 'getLibreViewData',
-  DELAY_MINUTES: 0,
+  DELAY_MINUTES: 1,
   PERIOD_MINUTES: 1,
 } as const;
 

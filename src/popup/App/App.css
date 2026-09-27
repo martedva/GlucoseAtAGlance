@@ -1,5 +1,6 @@
 .App {
   text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif;
 }
 
 .loading-container {
@@ -17,20 +18,25 @@
 
 .sensor-expiry.warning {
   color: #f57c00;
+  font-weight: 500;
 }
 
 .sensor-expiry.critical {
   color: #d32f2f;
+  font-weight: 500;
 }
 
 .action-button,
-.retry-button {
+.retry-button,
+.settings-button {
   padding: 8px 12px;
   border: none;
   border-radius: 6px;
   font-size: 16px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition:
+    background-color 0.2s,
+    transform 0.1s;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -44,6 +50,29 @@
 
 .action-button:hover {
   background-color: #e0e0e0;
+}
+
+.action-button:focus {
+  outline: 2px solid #2196f3;
+  outline-offset: 2px;
+}
+
+.action-button:active {
+  transform: scale(0.95);
+}
+
+.settings-button {
+  background-color: #607d8b;
+  color: white;
+}
+
+.settings-button:hover {
+  background-color: #546e7a;
+}
+
+.settings-button:focus {
+  outline: 2px solid #455a64;
+  outline-offset: 2px;
 }
 
 .error-message {
@@ -72,6 +101,11 @@
   background-color: #b91c1c;
 }
 
+.retry-button:focus {
+  outline: 2px solid #991b1b;
+  outline-offset: 2px;
+}
+
 .graph-container {
   width: 100%;
   overflow-x: auto;
@@ -79,4 +113,58 @@
 
 .graph-skeleton {
   border-radius: 8px;
+}
+
+/* Keyboard shortcuts hint */
+.keyboard-hint {
+  font-size: 11px;
+  color: #999;
+  margin-top: 8px;
+}
+
+/* Focus visible for better accessibility */
+button:focus-visible {
+  outline: 2px solid #2196f3;
+  outline-offset: 2px;
+}
+
+/* Settings panel styles */
+.settings-overlay {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.settings-panel {
+  animation: slideIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 400px) {
+  .action-button {
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+
+  .graph-container {
+    overflow-x: scroll;
+  }
 }

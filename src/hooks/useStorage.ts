@@ -31,6 +31,23 @@ export function useStorage<T>(
     loadValue();
   }, [key]);
 
+  // Listen for storage changes from other parts of the extension
+  useEffect(() => {
+    const handleStorageChange = (changes: { [key: string]: chrome.storage.StorageChange }) => {
+      if (changes[key] && changes[key].newValue !== undefined) {
+        setValueState(changes[key].newValue as T);
+      } else if (changes[key] && changes[key].newValue === undefined) {
+        // Key was removed
+        setValueState(defaultValue);
+      }
+    };
+
+    chrome.storage.onChanged.addListener(handleStorageChange);
+    return () => {
+      chrome.storage.onChanged.removeListener(handleStorageChange);
+    };
+  }, [key, defaultValue]);
+
   // Set value in storage
   const setValue = useCallback(
     async (newValue: T) => {

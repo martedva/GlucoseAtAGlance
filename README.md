@@ -9,13 +9,16 @@ A Chrome extension for monitoring glucose levels from LibreLinkUp. View your con
 ## Features
 
 - 📊 **Real-time Glucose Monitoring**: View current glucose levels with trend arrows
-- 📈 **Interactive Graph**: Visualize glucose trends over time with Observable Plot
+- 📈 **Interactive Graph**: Visualize glucose trends with 15-minute prediction overlay
+- 🔮 **Trend Prediction**: See where your glucose is heading (rising/falling/stable)
+- 🟢 **Data Freshness Indicator**: Know instantly if data is live, stale, or offline
 - ⚠️ **Smart Alerts**: Color-coded glucose levels (green/yellow/orange/red)
 - 📅 **Sensor Tracking**: Monitor sensor expiry with warning notifications
 - 💾 **Data Export**: Export your glucose data to CSV or JSON formats
 - ⚙️ **Customizable Settings**: Adjust refresh intervals and notification preferences
 - ♿ **Accessible**: WCAG compliant with full keyboard navigation and screen reader support
 - 🔒 **Secure**: Credentials stored locally, never sent to third parties
+- ⌨️ **Keyboard Shortcuts**: Quick access to all features without mouse
 
 ## Installation
 
@@ -60,22 +63,38 @@ A Chrome extension for monitoring glucose levels from LibreLinkUp. View your con
 
 ### Features
 
-- **Refresh Data**: Click the "Refresh" button to manually update glucose readings
-- **Export Data**: Use the "Export" dropdown to download your data as CSV or JSON
-- **Settings**: Click the gear icon (⚙️) to customize:
-  - Refresh interval (1-15 minutes)
-  - Trend arrow visibility
-  - Sound notifications
-  - High/low glucose thresholds
+- **Refresh Data**: Click the refresh button (🔄) or press `Ctrl+R` to manually update glucose readings
+- **Settings**: Click the gear icon (⚙️) or press `Ctrl+S` to customize:
+  - Refresh interval (2/5/10/15 minutes)
+  - Enable/disable browser notifications for high/low glucose alerts
+  - Test notification buttons to preview alert appearance
+- **Logout**: Click the logout button (↗️) or press `Ctrl+L` to sign out
+- **Data Freshness**: Check the status indicator at the top:
+  - ✅ **Live data** (green) - Data is current
+  - ⚠️ **Data may be outdated** (yellow) - Data is stale (>2x refresh interval)
+  - ❌ **No connection** (red) - Unable to fetch data
+- **Trend Prediction**: View the trend arrow and predicted glucose value:
+  - ↗️ Rising - Glucose is increasing
+  - ↑ Rising fast - Glucose is increasing rapidly
+  - → Stable - Glucose is stable
+  - ↓ Falling fast - Glucose is decreasing rapidly
+  - ↘️ Falling - Glucose is decreasing
+  - Dotted line on graph shows 15-minute prediction
+- **Glucose Notifications**: Get browser notifications when glucose goes outside target range
+  - Enable in Settings panel
+  - Test alerts with "Test Low Alert" and "Test High Alert" buttons
+  - Only notifies on state change (not repeatedly for same condition)
 
 ### Keyboard Shortcuts
 
-| Key | Action |
-|-----|--------|
-| `R` | Refresh data |
-| `L` | Logout |
-| `S` | Open settings |
-| `E` | Open export menu |
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+R` or `Cmd+R` | Refresh data |
+| `Ctrl+S` or `Cmd+S` | Open settings |
+| `Ctrl+L` or `Cmd+L` | Logout |
+| `Escape` | Close settings panel |
+
+**Note**: Shortcuts are disabled when typing in input fields to avoid conflicts.
 
 ## Architecture
 
@@ -112,12 +131,14 @@ GlucoseAtAGlance/
 ### Key Components
 
 - `App.tsx`: Main application component with authentication state
-- `GlucoseDisplay.tsx`: Shows current glucose value and sensor status
-- `DevelopmentGraph.tsx`: Interactive glucose trend graph
+- `GlucoseDisplay.tsx`: Shows current glucose value, trend arrow, and predicted value
+- `DevelopmentGraph.tsx`: Interactive glucose trend graph with prediction overlay
+- `ConnectionStatusIndicator.tsx`: Data freshness status (live/stale/offline)
 - `LoginForm.tsx`: User authentication
-- `SettingsPanel.tsx`: User preferences
-- `ExportButton.tsx`: Data export functionality
-- `ErrorBoundary.tsx`: Graceful error handling
+- `SettingsPanel.tsx`: User preferences (refresh interval)
+- `ErrorBoundary.tsx`: Graceful error handling with user-friendly messages
+- `useConnectionStatus.ts`: Hook for monitoring data freshness
+- `trend-prediction.ts`: Linear regression algorithm for glucose forecasting
 
 ## Development
 

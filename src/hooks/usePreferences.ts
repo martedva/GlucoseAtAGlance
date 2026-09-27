@@ -5,6 +5,7 @@ const STORAGE_KEY = 'user_preferences';
 
 const DEFAULT_PREFERENCES: UserPreferences = {
   refreshInterval: 5,
+  notificationsEnabled: false,
 };
 
 interface UsePreferencesReturn {

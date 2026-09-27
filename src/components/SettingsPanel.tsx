@@ -2,6 +2,7 @@ import { memo, useEffect, useState } from 'react';
 
 interface UserPreferences {
   refreshInterval: number; // minutes
+  notificationsEnabled: boolean;
 }
 
 interface SettingsPanelProps {
@@ -9,6 +10,7 @@ interface SettingsPanelProps {
   onClose: () => void;
   preferences: UserPreferences;
   onSavePreferences: (prefs: UserPreferences) => void;
+  onTestNotification: (type: 'low' | 'high') => void;
 }
 
 /**
@@ -19,6 +21,7 @@ const SettingsPanel = memo(function SettingsPanel({
   onClose,
   preferences,
   onSavePreferences,
+  onTestNotification,
 }: SettingsPanelProps) {
   const [localPrefs, setLocalPrefs] = useState<UserPreferences>(preferences);
 
@@ -28,10 +31,10 @@ const SettingsPanel = memo(function SettingsPanel({
   }, [preferences]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
+    const { name, value, type } = e.target;
     setLocalPrefs((prev) => ({
       ...prev,
-      [name]: Number(value),
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : Number(value),
     }));
   };
 
@@ -107,6 +110,93 @@ const SettingsPanel = memo(function SettingsPanel({
             </select>
             <p style={{ margin: '8px 0 0 0', fontSize: '12px', color: '#666' }}>
               Minimum 2 minutes between sensor scans
+            </p>
+          </div>
+
+          {/* Notifications Toggle */}
+          <div>
+            <label
+              htmlFor="notificationsEnabled"
+              style={{ display: 'block', marginBottom: '4px', fontWeight: 500 }}
+            >
+              Glucose Alerts
+            </label>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
+              <input
+                type="checkbox"
+                id="notificationsEnabled"
+                name="notificationsEnabled"
+                checked={localPrefs.notificationsEnabled}
+                onChange={handleChange}
+                style={{
+                  width: '18px',
+                  height: '18px',
+                  cursor: 'pointer',
+                }}
+              />
+              <span style={{ fontSize: '14px', color: '#333' }}>
+                Enable notifications for high/low glucose
+              </span>
+            </div>
+            <p style={{ margin: '8px 0 0 0', fontSize: '12px', color: '#666' }}>
+              Get notified when glucose goes outside your target range (from LibreLink)
+            </p>
+          </div>
+
+          {/* Test Notifications */}
+          <div>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>
+              Test Notifications
+            </label>
+            <div
+              style={{
+                display: 'flex',
+                gap: '8px',
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => onTestNotification('low')}
+                style={{
+                  flex: 1,
+                  padding: '8px 12px',
+                  backgroundColor: '#fff3cd',
+                  color: '#856404',
+                  border: '1px solid #ffc107',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                }}
+              >
+                ⚠️ Test Low Alert
+              </button>
+              <button
+                type="button"
+                onClick={() => onTestNotification('high')}
+                style={{
+                  flex: 1,
+                  padding: '8px 12px',
+                  backgroundColor: '#f8d7da',
+                  color: '#721c24',
+                  border: '1px solid #f5c6cb',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                }}
+              >
+                🔴 Test High Alert
+              </button>
+            </div>
+            <p style={{ margin: '8px 0 0 0', fontSize: '12px', color: '#666' }}>
+              Preview what the notifications will look like
             </p>
           </div>
         </div>

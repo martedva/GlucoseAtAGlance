@@ -50,6 +50,7 @@
     "copy-webpack-plugin": "^13.0.0",
     "customize-cra": "^1.0.0",
     "react-app-rewired": "^2.2.1",
-    "sharp": "^0.35.5"
+    "sharp": "^0.35.5",
+    "tsconfig-paths-webpack-plugin": "^4.2.0"
   }
 }

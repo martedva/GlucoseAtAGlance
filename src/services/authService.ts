@@ -1,7 +1,7 @@
 /// <reference types="chrome" />
 
-import { getLibreToken } from '../api/libre/libre-api';
-import LoginResponse from '../types/loginResponse';
+import { getLibreToken } from '@/api/libre/libre-api';
+import type { LoginResponse } from '@/types/api';
 
 export interface AuthCredentials {
   email: string;

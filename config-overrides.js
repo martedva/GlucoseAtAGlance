@@ -1,5 +1,6 @@
-const { override } = require('customize-cra');
+const { override, addWebpackResolve } = require('customize-cra');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 
 const overrideEntry = (config) => {
   config.entry = {
@@ -20,6 +21,19 @@ const overrideOutput = (config) => {
   return config;
 };
 
+const overrideResolve = (config) => {
+  config.resolve = {
+    ...config.resolve,
+    plugins: [
+      ...(config.resolve.plugins || []),
+      new TsconfigPathsPlugin({
+        configFile: './tsconfig.json',
+      }),
+    ],
+  };
+  return config;
+};
+
 const overridePlugins = (config) => {
   config.plugins.push(
     new CopyWebpackPlugin({
@@ -33,5 +47,5 @@ const overridePlugins = (config) => {
 };
 
 module.exports = function webpack(config) {
-  return override(overrideEntry, overrideOutput, overridePlugins)(config);
-}
+  return override(overrideEntry, overrideOutput, overrideResolve, overridePlugins)(config);
+};

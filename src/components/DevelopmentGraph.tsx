@@ -1,62 +1,82 @@
-import * as Plot from "@observablehq/plot";
+import * as Plot from '@observablehq/plot';
 import { useEffect, useRef } from 'react';
-import { GraphData } from "../popup/App/App";
+import LoadingSkeleton from './LoadingSkeleton';
 
-interface DevelopmentGraphProps {
-  graphData?: GraphData[];
-  targetLow?: number;
-  targetHigh?: number;
+export interface GraphDataPoint {
+  time: Date;
+  value: number;
 }
 
-const DevelopmentGraph = ({ graphData, targetLow, targetHigh }: DevelopmentGraphProps) => {
+interface DevelopmentGraphProps {
+  graphData?: GraphDataPoint[];
+  targetLow?: number;
+  targetHigh?: number;
+  isLoading?: boolean;
+}
+
+const DevelopmentGraph = ({
+  graphData,
+  targetLow,
+  targetHigh,
+  isLoading = false,
+}: DevelopmentGraphProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!containerRef.current || !graphData) return;
+    if (!containerRef.current || !graphData || graphData.length === 0) return;
 
     // Parse the time strings to Date objects
-    const parsedData = graphData.map(d => ({
+    const parsedData = graphData.map((d) => ({
       ...d,
-      time: new Date(d.time)
+      time: new Date(d.time),
     }));
 
-    // Create the plot
-    const plot = Plot.plot({
-      marks: [
-        Plot.line(parsedData, {
-          x: "time",
-          y: "value",
-          stroke: "#000000",
-          strokeWidth: 3
-        }),
-        Plot.dot(parsedData, {
-          x: "time",
-          y: "value",
-          fill: "#000000",
-          r: 3.5
-        }),
+    // Create the plot marks
+    const marks: any[] = [
+      Plot.line(parsedData, {
+        x: 'time',
+        y: 'value',
+        stroke: '#000000',
+        strokeWidth: 3,
+      }),
+      Plot.dot(parsedData, {
+        x: 'time',
+        y: 'value',
+        fill: '#000000',
+        r: 3.5,
+      }),
+    ];
+
+    // Add target range rectangle if targets are defined
+    if (targetLow !== undefined && targetHigh !== undefined) {
+      marks.push(
         Plot.rect([{}], {
           x1: parsedData[0].time,
           x2: parsedData[parsedData.length - 1].time,
           y1: targetLow,
           y2: targetHigh,
-          fill: "#88ba82",
-          fillOpacity: 0.3
-        }),
-      ],
+          fill: '#88ba82',
+          fillOpacity: 0.3,
+        })
+      );
+    }
+
+    // Create the plot
+    const plot = Plot.plot({
+      marks,
       width: 640,
       height: 400,
       marginLeft: 50,
       marginBottom: 50,
       x: {
-        type: "time",
-        label: "Time",
-        grid: false
+        type: 'time',
+        label: 'Time',
+        grid: false,
       },
       y: {
-        label: "mmol/L",
+        label: 'mmol/L',
         domain: [0, 21],
-        grid: true
+        grid: true,
       },
     });
 
@@ -73,9 +93,25 @@ const DevelopmentGraph = ({ graphData, targetLow, targetHigh }: DevelopmentGraph
     };
   }, [graphData, targetLow, targetHigh]);
 
+  if (isLoading) {
+    return (
+      <div className="graph-container">
+        <LoadingSkeleton width="100%" height="400px" className="graph-skeleton" />
+      </div>
+    );
+  }
+
+  if (!graphData || graphData.length === 0) {
+    return (
+      <div className="graph-container">
+        <p style={{ textAlign: 'center', color: '#666' }}>No glucose data available</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-4">
-      <div ref={containerRef} className="w-full overflow-x-auto"></div>
+    <div className="graph-container">
+      <div ref={containerRef} className="graph" />
     </div>
   );
 };

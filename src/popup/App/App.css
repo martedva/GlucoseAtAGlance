@@ -79,3 +79,12 @@
 .retry-button:hover {
   background-color: #b91c1c;
 }
+
+.graph-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.graph-skeleton {
+  border-radius: 8px;
+}

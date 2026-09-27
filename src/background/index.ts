@@ -70,9 +70,10 @@ function handleShowNotification(
 
   const notificationId = request.type === 'warning' ? 'glucose-alert' : 'glucose-info';
   
+  // Use green stable icon for notifications (not React logo)
   const notificationOptions: chrome.notifications.NotificationOptions = {
     type: 'basic',
-    iconUrl: chrome.runtime.getURL('logo192.png'),
+    iconUrl: chrome.runtime.getURL('static/assets/icons/green-right-128.png'),
     title: request.title,
     message: request.body,
     priority: request.type === 'warning' ? 2 : 0,
@@ -119,9 +120,10 @@ function showGlucoseNotification(title: string, body: string, type: 'warning' | 
 
   const notificationId = type === 'warning' ? 'glucose-alert' : 'glucose-info';
 
+  // Use green stable icon for notifications (not React logo)
   const notificationOptions: chrome.notifications.NotificationOptions = {
     type: 'basic',
-    iconUrl: chrome.runtime.getURL('logo192.png'),
+    iconUrl: chrome.runtime.getURL('static/assets/icons/green-right-128.png'),
     title,
     message: body,
     priority: type === 'warning' ? 2 : 0,

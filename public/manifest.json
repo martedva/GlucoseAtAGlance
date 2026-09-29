@@ -4,12 +4,13 @@
   "version": "1.0.0",
   "description": "A simple Chrome extension for following your glucose levels.",
   "icons": {
-    "16": "static/assets/icons/green-right-16.png",
-    "48": "static/assets/icons/green-right-48.png",
-    "128": "static/assets/icons/green-right-128.png"
+    "16": "assets/icons/green-right-16.png",
+    "48": "assets/icons/green-right-48.png",
+    "128": "assets/icons/green-right-128.png"
   },
   "background": {
-    "service_worker": "./static/js/background.js"
+    "service_worker": "src/background/index.ts",
+    "type": "module"
   },
   "action": {
     "default_popup": "index.html"

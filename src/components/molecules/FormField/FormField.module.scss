@@ -1,0 +1,41 @@
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-1;
+}
+
+.form-field__label {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-gray-700;
+}
+
+.form-field__help {
+  font-size: $font-size-xs;
+  color: $color-gray-500;
+  margin-top: $spacing-1;
+}
+
+.form-field__checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+}
+
+.form-field__checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  
+  &:focus-visible {
+    outline: 2px solid $color-primary;
+    outline-offset: 2px;
+  }
+}
+
+.form-field__checkbox-label {
+  font-size: $font-size-sm;
+  color: $color-gray-700;
+  cursor: pointer;
+}

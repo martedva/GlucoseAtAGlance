@@ -1,13 +1,15 @@
 import { useCallback, useState } from 'react';
-import ConnectionStatusIndicator from '@/components/ConnectionStatusIndicator';
-import DevelopmentGraph from '@/components/DevelopmentGraph';
-import ErrorBoundary from '@/components/ErrorBoundary';
-import ErrorMessage from '@/components/ErrorMessage';
-import GlucoseDisplay from '@/components/GlucoseDisplay';
-import HeaderActions from '@/components/HeaderActions';
-import LoginForm from '@/components/LoginForm';
-import SettingsPanel, { type UserPreferences } from '@/components/SettingsPanel';
-import StatisticsPanel from '@/components/StatisticsPanel';
+import {
+  ConnectionStatusIndicator,
+  DevelopmentGraph,
+  ErrorMessage,
+  GlucoseDisplay,
+  HeaderActions,
+  LoginForm,
+  SettingsPanel,
+  StatisticsPanel,
+  type UserPreferences,
+} from '@/components/organisms';
 import { UI_CONFIG } from '@/config';
 import {
   useAuth,
@@ -22,7 +24,7 @@ import {
 } from '@/hooks';
 import { useLogbookData } from '@/hooks/useLogbookData';
 import { useSensorExpiry } from '@/hooks/useSensorExpiry';
-import './App.css';
+import styles from './App.module.scss';
 
 /**
  * Main App component
@@ -38,7 +40,7 @@ function App() {
   const { logbookGraphData, isLoading: isLogbookLoading } = useLogbookData();
 
   // Derived data from hooks
-  const { targetLow, targetHigh, targetLowRaw, targetHighRaw, uom } = useGlucoseTargets(data?.data);
+  const { targetLow, targetHigh } = useGlucoseTargets(data?.data);
   const { daysToExpire, sensorStatus } = useSensorExpiry(data?.data?.activeSensors?.[0]);
   const { preferences, savePreferences, isLoading: isPrefsLoading } = usePreferences();
   const { status: connectionStatus } = useConnectionStatus(
@@ -138,9 +140,7 @@ function App() {
   if (!isAuthenticated) {
     return (
       <div className="App" style={{ width: `${UI_CONFIG.POPUP_WIDTH}px` }}>
-        <ErrorBoundary>
-          <LoginForm onLoginSuccess={handleLoginSuccess} onError={() => {}} />
-        </ErrorBoundary>
+        <LoginForm onLoginSuccess={handleLoginSuccess} onError={() => {}} />
       </div>
     );
   }
@@ -151,82 +151,61 @@ function App() {
 
   return (
     <div className="App" style={{ width: `${UI_CONFIG.POPUP_WIDTH}px` }}>
-      <ErrorBoundary>
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '20px',
-            padding: '20px',
-          }}
-          role="main"
-          aria-label="Glucose monitoring dashboard"
-        >
-          {/* Connection Status Indicator - Critical for safety */}
-          <ConnectionStatusIndicator
-            status={connectionStatus}
-            lastSuccessfulFetch={lastFetchTime}
-          />
+      <div className={styles.appContent} role="main" aria-label="Glucose monitoring dashboard">
+        {/* Connection Status Indicator - Critical for safety */}
+        <ConnectionStatusIndicator
+          status={connectionStatus}
+          lastSuccessfulFetch={lastFetchTime}
+        />
 
-          {/* Header with glucose display and action buttons */}
-          <div
-            style={{
-              width: '100%',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '12px',
-            }}
-          >
-            <GlucoseDisplay
-              glucose={glucoseValue}
-              daysToExpire={daysToExpire}
-              sensorStatus={sensorStatus}
-              graphData={graphData}
-              currentTrendArrow={currentTrendArrow}
-            />
-            <HeaderActions
-              onRefresh={handleRefresh}
-              onOpenSettings={handleOpenSettings}
-              onLogout={logout}
-              isRefreshing={isDataLoading}
-            />
-          </div>
-
-          {/* Error message with retry */}
-          {error && (
-            <ErrorMessage
-              error={error}
-              onRetry={handleRefresh}
-              isRetrying={isDataLoading}
-            />
-          )}
-
-          {/* Glucose graph with target range */}
-          <DevelopmentGraph
+        {/* Header with glucose display and action buttons */}
+        <div className={styles.appHeader}>
+          <GlucoseDisplay
+            glucose={glucoseValue}
+            daysToExpire={daysToExpire}
+            sensorStatus={sensorStatus}
             graphData={graphData}
-            targetLow={targetLow}
-            targetHigh={targetHigh}
-            isLoading={isDataLoading}
+            currentTrendArrow={currentTrendArrow}
           />
-
-          {/* Statistics panel with TIR, average, min, max */}
-          <StatisticsPanel
-            graphData={graphData}
-            logbookData={logbookGraphData}
-            targetLow={targetLowRaw}
-            targetHigh={targetHighRaw}
-            uom={uom}
-            isLoading={isDataLoading || isLogbookLoading}
+          <HeaderActions
+            onRefresh={handleRefresh}
+            onOpenSettings={handleOpenSettings}
+            onLogout={logout}
+            isRefreshing={isDataLoading}
           />
-
-          {/* Keyboard shortcuts hint */}
-          <p className="keyboard-hint" aria-hidden="true">
-            Shortcuts: Ctrl+R Refresh • Ctrl+S Settings • Ctrl+L Logout
-          </p>
         </div>
-      </ErrorBoundary>
+
+        {/* Error message with retry */}
+        {error && (
+          <ErrorMessage
+            error={error}
+            onRetry={handleRefresh}
+            isRetrying={isDataLoading}
+          />
+        )}
+
+        {/* Glucose graph with target range */}
+        <DevelopmentGraph
+          graphData={graphData}
+          targetLow={targetLow}
+          targetHigh={targetHigh}
+          isLoading={isDataLoading}
+        />
+
+        {/* Statistics panel with TIR, average, min, max */}
+        <StatisticsPanel
+          graphData={graphData}
+          logbookData={logbookGraphData}
+          targetLow={targetLow}
+          targetHigh={targetHigh}
+          isLoading={isDataLoading || isLogbookLoading}
+        />
+
+        {/* Keyboard shortcuts hint */}
+        <p className="keyboard-hint" aria-hidden="true">
+          Shortcuts: Ctrl+R Refresh • Ctrl+S Settings • Ctrl+L Logout
+        </p>
+      </div>
 
       <SettingsPanel
         isOpen={isSettingsOpen}

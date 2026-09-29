@@ -1,0 +1,36 @@
+
+.tab-button {
+  padding: $spacing-2 $spacing-4;
+  border: none;
+  border-radius: $radius-sm;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-normal;
+  cursor: pointer;
+  transition: background-color $transition-fast, color $transition-fast;
+  background-color: $color-gray-100;
+  color: $color-gray-600;
+  white-space: nowrap;
+  
+  &:hover:not(:disabled) {
+    background-color: $color-gray-200;
+  }
+  
+  &:focus-visible {
+    outline: 2px solid $color-primary;
+    outline-offset: 2px;
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.tab-button--active {
+  background-color: $color-primary;
+  color: $color-white;
+  
+  &:hover:not(:disabled) {
+    background-color: $color-primary-dark;
+  }
+}

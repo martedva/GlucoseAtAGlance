@@ -1,0 +1,43 @@
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.icon--small {
+  font-size: 14px;
+}
+
+.icon--medium {
+  font-size: 20px;
+}
+
+.icon--large {
+  font-size: 24px;
+}
+
+.icon--trend-up {
+  color: $glucose-rising-fast;
+}
+
+.icon--trend-down {
+  color: $glucose-falling;
+}
+
+.icon--trend-stable {
+  color: $glucose-stable;
+}
+
+.icon--status-success {
+  color: $color-success;
+}
+
+.icon--status-warning {
+  color: $color-warning;
+}
+
+.icon--status-error {
+  color: $color-error;
+}

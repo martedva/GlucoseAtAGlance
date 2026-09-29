@@ -5,6 +5,7 @@ import ErrorBoundary from '@/components/ErrorBoundary';
 import GlucoseDisplay from '@/components/GlucoseDisplay';
 import LoginForm from '@/components/LoginForm';
 import SettingsPanel, { type UserPreferences } from '@/components/SettingsPanel';
+import StatisticsPanel from '@/components/StatisticsPanel';
 import { SENSOR_CONFIG, UI_CONFIG } from '@/config';
 import {
   useAuth,
@@ -13,6 +14,7 @@ import {
   useKeyboardShortcuts,
   usePreferences,
 } from '@/hooks';
+import { useLogbookData } from '@/hooks/useLogbookData';
 import { useSensorExpiry } from '@/hooks/useSensorExpiry';
 import { parseLibreTimestamp } from '@/types/api';
 import './App.css';
@@ -24,6 +26,7 @@ import './App.css';
 function App() {
   const { isAuthenticated, isAuthLoaded, login, logout } = useAuth();
   const { data, isLoading: isDataLoading, error, lastFetchTime, fetchData } = useGlucoseData();
+  const { data: logbookData, isLoading: isLogbookLoading } = useLogbookData();
   const { daysToExpire, sensorStatus } = useSensorExpiry(data?.data?.activeSensors?.[0]);
   const { preferences, savePreferences, isLoading: isPrefsLoading } = usePreferences();
   const { status: connectionStatus } = useConnectionStatus(
@@ -88,6 +91,15 @@ function App() {
       value: item.Value,
     }));
   }, [data?.data.graphData]);
+
+  // Memoize logbook graph data transformation
+  const logbookGraphData = useMemo(() => {
+    if (!logbookData?.data) return [];
+    return logbookData.data.map((item) => ({
+      time: parseLibreTimestamp(item.Timestamp),
+      value: item.Value,
+    }));
+  }, [logbookData?.data]);
 
   // Memoize target values from API
   const targetLow = useMemo(() => {
@@ -278,6 +290,14 @@ function App() {
             targetLow={targetLow}
             targetHigh={targetHigh}
             isLoading={isDataLoading}
+          />
+
+          <StatisticsPanel
+            graphData={graphData}
+            logbookData={logbookGraphData}
+            targetLow={targetLow}
+            targetHigh={targetHigh}
+            isLoading={isDataLoading || isLogbookLoading}
           />
 
           {/* Keyboard shortcuts hint */}

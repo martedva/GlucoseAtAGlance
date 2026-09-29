@@ -248,6 +248,8 @@ async function handleGetToken(sendResponse: (response: string | null) => void) {
 async function handleLogout(sendResponse: (response: { success: boolean }) => void) {
   try {
     await authService.logout();
+    // Clear logbook cache
+    await chrome.storage.local.remove(['logbook_data', 'logbook_timestamp']);
     sendResponse({ success: true });
   } catch {
     sendResponse({ success: false });

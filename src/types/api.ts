@@ -200,6 +200,13 @@ export interface LibreViewResponse {
   ticket: Ticket;
 }
 
+// Logbook Response
+export interface LogbookResponse {
+  status: number;
+  data: GraphDataPoint[];
+  ticket: Ticket;
+}
+
 /**
  * Helper function to parse LibreLinkUp timestamp string to Date
  * API returns timestamps in format "/Date(1234567890)/" or similar

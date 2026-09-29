@@ -1,5 +1,5 @@
 import { memo, InputHTMLAttributes } from 'react';
-import styles from './Input.module.scss';
+import './Input.css';
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -21,28 +21,22 @@ const Input = memo(function Input({
   id,
   ...props
 }: InputProps) {
-  const inputId = id || props.name;
-  const classNames = [
-    styles.input,
-    error && styles['input--error'],
-    className,
-  ]
-    .filter(Boolean)
-    .join(' ');
+  const inputId = id || (props.name as string);
+  const classNames = ['input', error && 'input--error', className].filter(Boolean).join(' ');
 
   return (
-    <div className={`${styles['input-wrapper']} ${wrapperClassName}`}>
+    <div className={`input-wrapper ${wrapperClassName}`}>
       {label && (
-        <label htmlFor={inputId} className={styles['input-label']}>
+        <label htmlFor={inputId} className="input-label">
           {label}
         </label>
       )}
       <input id={inputId} className={classNames} {...props} />
       {helpText && !error && (
-        <p className={styles['input-help']}>{helpText}</p>
+        <p className="input-help">{helpText}</p>
       )}
       {error && (
-        <p className={styles['input-error']} role="alert">
+        <p className="input-error" role="alert">
           {error}
         </p>
       )}

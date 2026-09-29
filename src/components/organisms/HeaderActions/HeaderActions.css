@@ -1,0 +1,5 @@
+/* HeaderActions Component Styles */
+.header-actions {
+  display: flex;
+  gap: var(--spacing-2);
+}

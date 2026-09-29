@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import styles from './StatCard.module.scss';
+import './StatCard.css';
 
 export interface StatCardProps {
   label: string;
@@ -14,13 +14,13 @@ export interface StatCardProps {
  */
 const StatCard = memo(function StatCard({ label, value, unit, subtext }: StatCardProps) {
   return (
-    <div className={styles.statCard} role="article" aria-label={`${label}: ${value}${unit || ''}`}>
-      <div className={styles.statCard__label}>{label}</div>
-      <div className={styles.statCard__value}>
+    <div className="stat-card" role="article" aria-label={`${label}: ${value}${unit || ''}`}>
+      <div className="stat-card__label">{label}</div>
+      <div className="stat-card__value">
         {value}
-        {unit && <span className={styles.statCard__unit}>{unit}</span>}
+        {unit && <span className="stat-card__unit">{unit}</span>}
       </div>
-      {subtext && <div className={styles.statCard__subtext}>{subtext}</div>}
+      {subtext && <div className="stat-card__subtext">{subtext}</div>}
     </div>
   );
 });

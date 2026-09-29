@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { Button } from '@/components/atoms';
-import styles from './HeaderActions.module.scss';
+import './HeaderActions.css';
 
 export interface HeaderActionsProps {
   onRefresh: () => void;
@@ -12,7 +12,6 @@ export interface HeaderActionsProps {
 /**
  * Organism HeaderActions component
  * Header action buttons (Refresh, Settings, Logout)
- * Includes keyboard shortcut hints in tooltips and aria labels
  */
 const HeaderActions = memo(function HeaderActions({
   onRefresh,
@@ -21,7 +20,7 @@ const HeaderActions = memo(function HeaderActions({
   isRefreshing,
 }: HeaderActionsProps) {
   return (
-    <div className={styles.headerActions} role="group" aria-label="Actions">
+    <div className="header-actions" role="group" aria-label="Actions">
       <Button
         onClick={onRefresh}
         aria-label="Refresh glucose data (Ctrl+R)"

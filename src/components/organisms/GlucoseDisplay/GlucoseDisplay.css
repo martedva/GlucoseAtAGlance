@@ -1,0 +1,73 @@
+/* GlucoseDisplay Component Styles */
+.glucose-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+  background-color: var(--color-gray-50);
+  border-radius: var(--radius-lg);
+  min-width: 200px;
+}
+
+.glucose-display__header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  font-size: var(--font-size-xs);
+  color: var(--color-gray-500);
+  width: 100%;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.glucose-display__live-indicator {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-success-text);
+}
+
+.glucose-display__sensor-status {
+  color: var(--color-warning-text);
+}
+
+.glucose-display__time {
+  color: var(--color-gray-400);
+}
+
+.glucose-display__value {
+  font-size: 48px;
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gray-900);
+  line-height: 1;
+}
+
+.glucose-display__unit {
+  font-size: var(--font-size-lg);
+  color: var(--color-gray-500);
+  font-weight: var(--font-weight-normal);
+}
+
+.glucose-display__trend {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+}
+
+.glucose-display__trend--rising {
+  color: var(--glucose-rising);
+}
+
+.glucose-display__trend--falling {
+  color: var(--glucose-falling);
+}
+
+.glucose-display__trend--stable {
+  color: var(--glucose-stable);
+}
+
+.glucose-display__delta {
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-500);
+}

@@ -1,0 +1,40 @@
+/* ErrorMessage Component Styles */
+.error-message {
+  padding: var(--spacing-3) var(--spacing-4);
+  background-color: var(--color-error-bg);
+  border: 1px solid var(--color-error-border);
+  border-radius: var(--radius-md);
+  color: var(--color-error-text);
+  font-size: var(--font-size-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  width: 100%;
+  max-width: 400px;
+}
+
+.error-message__retry-button {
+  padding: var(--spacing-1) var(--spacing-3);
+  background-color: var(--color-error);
+  color: var(--color-white);
+  font-size: var(--font-size-xs);
+  margin-left: auto;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.error-message__retry-button:hover:not(:disabled) {
+  background-color: var(--color-error-dark);
+}
+
+.error-message__retry-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.error-message__retry-button:focus-visible {
+  outline: 2px solid #991b1b;
+  outline-offset: 2px;
+}

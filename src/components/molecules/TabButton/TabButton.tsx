@@ -1,5 +1,5 @@
 import { memo, ButtonHTMLAttributes } from 'react';
-import styles from './TabButton.module.scss';
+import './TabButton.css';
 
 export interface TabButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   isActive?: boolean;
@@ -18,12 +18,10 @@ const TabButton = memo(function TabButton({
   ...props
 }: TabButtonProps) {
   const classNames = [
-    styles.tabButton,
-    isActive && styles['tab-button--active'],
+    'tab-button',
+    isActive && 'tab-button--active',
     className,
-  ]
-    .filter(Boolean)
-    .join(' ');
+  ].filter(Boolean).join(' ');
 
   return (
     <button

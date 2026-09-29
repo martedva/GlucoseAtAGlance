@@ -1,4 +1,4 @@
-
+/* Icon Component Styles */
 .icon {
   display: inline-flex;
   align-items: center;
@@ -19,25 +19,25 @@
 }
 
 .icon--trend-up {
-  color: $glucose-rising-fast;
+  color: var(--glucose-rising);
 }
 
 .icon--trend-down {
-  color: $glucose-falling;
+  color: var(--glucose-falling);
 }
 
 .icon--trend-stable {
-  color: $glucose-stable;
+  color: var(--glucose-stable);
 }
 
 .icon--status-success {
-  color: $color-success;
+  color: var(--color-success);
 }
 
 .icon--status-warning {
-  color: $color-warning;
+  color: var(--color-warning);
 }
 
 .icon--status-error {
-  color: $color-error;
+  color: var(--color-error);
 }

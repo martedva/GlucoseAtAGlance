@@ -8,8 +8,8 @@ import {
   LoginForm,
   SettingsPanel,
   StatisticsPanel,
-  type UserPreferences,
 } from '@/components/organisms';
+import type { UserPreferences } from '@/hooks/usePreferences';
 import { UI_CONFIG } from '@/config';
 import {
   useAuth,
@@ -24,7 +24,7 @@ import {
 } from '@/hooks';
 import { useLogbookData } from '@/hooks/useLogbookData';
 import { useSensorExpiry } from '@/hooks/useSensorExpiry';
-import styles from './App.module.scss';
+import '@/styles/global.css';
 
 /**
  * Main App component
@@ -47,6 +47,12 @@ function App() {
     preferences.refreshInterval,
     lastFetchTime
   );
+
+  // Extract data for display (before callbacks)
+  const glucoseValue = data?.data.connection.glucoseItem.Value;
+  const currentTrendArrow = data?.data.connection.glucoseItem.TrendArrow;
+  // Use API's uom (0 = mmol/L, 1 = mg/dL) - this is the user's actual preferred unit
+  const apiUom = data?.data.connection.uom ?? 0;
 
   // UI state
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -76,17 +82,18 @@ function App() {
   );
 
   const handleTestNotification = useCallback((type: 'low' | 'high') => {
-    const testValues = {
-      low: { value: 3.5, threshold: 4.0 },
-      high: { value: 12.0, threshold: 10.0 },
-    };
+    const isMmol = apiUom === 0;
+    const testValues = isMmol
+      ? { low: { value: 3.5, threshold: 4.0 }, high: { value: 12.0, threshold: 10.0 } }
+      : { low: { value: 63, threshold: 72 }, high: { value: 216, threshold: 180 } };
 
     const test = testValues[type];
+    const unit = isMmol ? 'mmol/L' : 'mg/dL';
     const title = type === 'low' ? '⚠️ Low Glucose Alert' : '⚠️ High Glucose Alert';
     const body =
       type === 'low'
-        ? `Your glucose is ${test.value.toFixed(1)} mmol/L (below ${test.threshold.toFixed(1)} mmol/L)`
-        : `Your glucose is ${test.value.toFixed(1)} mmol/L (above ${test.threshold.toFixed(1)} mmol/L)`;
+        ? `Your glucose is ${test.value} ${unit} (below ${test.threshold} ${unit})`
+        : `Your glucose is ${test.value} ${unit} (above ${test.threshold} ${unit})`;
 
     chrome.runtime.sendMessage(
       {
@@ -101,7 +108,7 @@ function App() {
         }
       }
     );
-  }, []);
+  }, [apiUom]);
 
   // Side effects via hooks
   useExtensionIcon(data?.data.connection.glucoseItem);
@@ -146,12 +153,11 @@ function App() {
   }
 
   // Extract data for display
-  const glucoseValue = data?.data.connection.glucoseItem.Value;
-  const currentTrendArrow = data?.data.connection.glucoseItem.TrendArrow;
+  // (already extracted above before callbacks)
 
   return (
     <div className="App" style={{ width: `${UI_CONFIG.POPUP_WIDTH}px` }}>
-      <div className={styles.appContent} role="main" aria-label="Glucose monitoring dashboard">
+      <div className="app-content" role="main" aria-label="Glucose monitoring dashboard">
         {/* Connection Status Indicator - Critical for safety */}
         <ConnectionStatusIndicator
           status={connectionStatus}
@@ -159,13 +165,14 @@ function App() {
         />
 
         {/* Header with glucose display and action buttons */}
-        <div className={styles.appHeader}>
+        <div className="app-header">
           <GlucoseDisplay
             glucose={glucoseValue}
             daysToExpire={daysToExpire}
             sensorStatus={sensorStatus}
             graphData={graphData}
             currentTrendArrow={currentTrendArrow}
+            uom={apiUom}
           />
           <HeaderActions
             onRefresh={handleRefresh}
@@ -190,6 +197,7 @@ function App() {
           targetLow={targetLow}
           targetHigh={targetHigh}
           isLoading={isDataLoading}
+          uom={apiUom}
         />
 
         {/* Statistics panel with TIR, average, min, max */}
@@ -199,6 +207,7 @@ function App() {
           targetLow={targetLow}
           targetHigh={targetHigh}
           isLoading={isDataLoading || isLogbookLoading}
+          uom={apiUom}
         />
 
         {/* Keyboard shortcuts hint */}

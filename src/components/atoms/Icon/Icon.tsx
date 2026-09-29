@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import styles from './Icon.module.scss';
+import './Icon.css';
 
 export type IconSize = 'small' | 'medium' | 'large';
 export type IconVariant = 
@@ -16,8 +16,6 @@ export interface IconProps {
   size?: IconSize;
   variant?: IconVariant;
   className?: string;
-  'aria-label'?: string;
-  title?: string;
 }
 
 /**
@@ -32,13 +30,11 @@ const Icon = memo(function Icon({
   ...props
 }: IconProps) {
   const classNames = [
-    styles.icon,
-    styles[`icon--${size}`],
-    variant !== 'default' && styles[`icon--${variant}`],
+    'icon',
+    `icon--${size}`,
+    variant !== 'default' && `icon--${variant}`,
     className,
-  ]
-    .filter(Boolean)
-    .join(' ');
+  ].filter(Boolean).join(' ');
 
   return (
     <span className={classNames} {...props}>

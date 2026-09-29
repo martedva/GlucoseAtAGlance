@@ -1,4 +1,5 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   cleanupChromeMocks,
   getMockCalls,
@@ -88,7 +89,7 @@ describe.skip('useStorage', () => {
     const mockStorage = getMockChromeStorage();
     mockStorage.get.mockRejectedValueOnce(new Error('Storage error'));
 
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     const { result } = renderHook(() => useStorage('testKey', 'default'));
 

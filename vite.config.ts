@@ -36,19 +36,17 @@ export default defineConfig({
       '@utils': fileURLToPath(new URL('./src/utils', import.meta.url)),
     },
   },
-  css: {
-    preprocessorOptions: {
-      scss: {
-        additionalData: `@import "@/styles/variables";`,
-        includePaths: [fileURLToPath(new URL('./src', import.meta.url))],
-      },
-    },
-  },
   server: {
     port: 3000,
     strictPort: true,
     hmr: {
       port: 3000,
     },
+  },
+  test: {
+    globals: true,
+    environment: 'happy-dom',
+    setupFiles: './src/setupTests.ts',
+    css: true,
   },
 });

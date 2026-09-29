@@ -1,148 +1,121 @@
-import { memo, useEffect, useState } from 'react';
-import { Button } from '@/components/atoms';
+import { memo } from 'react';
+import { Button, Input } from '@/components/atoms';
 import { FormField } from '@/components/molecules';
-import styles from './SettingsPanel.module.scss';
-
-export interface UserPreferences {
-  refreshInterval: number;
-  notificationsEnabled: boolean;
-}
+import type { UserPreferences } from '@/hooks/usePreferences';
+import './SettingsPanel.css';
 
 export interface SettingsPanelProps {
   isOpen: boolean;
-  onClose: () => void;
   preferences: UserPreferences;
-  onSavePreferences: (prefs: UserPreferences) => void;
-  onTestNotification: (type: 'low' | 'high') => void;
+  onSavePreferences: (prefs: UserPreferences) => Promise<void>;
+  onClose: () => void;
+  onTestNotification?: (type: 'low' | 'high') => void;
 }
 
 /**
  * Organism SettingsPanel component
- * User preferences modal with refresh interval and notification settings
+ * User preferences configuration
  */
 const SettingsPanel = memo(function SettingsPanel({
   isOpen,
-  onClose,
   preferences,
   onSavePreferences,
+  onClose,
   onTestNotification,
 }: SettingsPanelProps) {
-  const [localPrefs, setLocalPrefs] = useState<UserPreferences>(preferences);
+  if (!isOpen) return null;
 
-  useEffect(() => {
-    setLocalPrefs(preferences);
-  }, [preferences]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-    setLocalPrefs((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : Number(value),
-    }));
-  };
-
-  const handleSave = () => {
-    onSavePreferences(localPrefs);
+  const handleSave = async () => {
+    await onSavePreferences(preferences);
     onClose();
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div
-      className={styles.settingsOverlay}
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="settings-title"
-    >
-      <div className={styles.settingsPanel} onClick={(e) => e.stopPropagation()}>
-        <h2 id="settings-title" className={styles.settingsPanel__title}>
-          Settings
-        </h2>
+    <div className="settings-panel" role="dialog" aria-label="Settings" aria-modal="true">
+      <div className="settings-panel__header">
+        <h2 className="settings-panel__title">Settings</h2>
+        <Button
+          onClick={onClose}
+          aria-label="Close settings"
+          className="settings-panel__close"
+        >
+          ✕
+        </Button>
+      </div>
 
-        <div className={styles.settingsPanel__content}>
-          <FormField
-            id="refreshInterval"
-            label="Refresh Interval (minutes)"
-            helpText="Minimum 2 minutes between sensor scans"
-          >
-            <select
-              id="refreshInterval"
-              name="refreshInterval"
-              value={localPrefs.refreshInterval}
-              onChange={handleChange}
-              className="form-select"
-              style={{
-                width: '100%',
-                padding: '8px',
-                borderRadius: '4px',
-                border: '1px solid #ddd',
+      <div className="settings-panel__content">
+        <div className="settings-panel__section">
+          <h3 className="settings-panel__section-title">Graph Settings</h3>
+          <FormField label="Prediction Period (minutes)" id="prediction-period" helpText="Show predicted glucose values">
+            <Input
+              id="prediction-period"
+              type="number"
+              min="0"
+              max="60"
+              step="5"
+              value={preferences.predictionPeriod ?? 15}
+              onChange={(e) => {
+                const newPrefs = {
+                  ...preferences,
+                  predictionPeriod: Number(e.target.value),
+                };
+                onSavePreferences(newPrefs);
               }}
-            >
-              <option value={2}>2 minutes</option>
-              <option value={5}>5 minutes</option>
-              <option value={10}>10 minutes</option>
-              <option value={15}>15 minutes</option>
-            </select>
+            />
           </FormField>
+        </div>
 
-          <FormField
-            id="notificationsEnabled"
-            label="Glucose Alerts"
-            helpText="Get notified when glucose goes outside your target range (from LibreLink)"
-          >
-            <div className={styles.formField__checkboxWrapper}>
-              <input
-                type="checkbox"
-                id="notificationsEnabled"
-                name="notificationsEnabled"
-                checked={localPrefs.notificationsEnabled}
-                onChange={handleChange}
-                className={styles.formField__checkbox}
-              />
-              <span className={styles.formField__checkboxLabel}>
-                Enable notifications for high/low glucose
-              </span>
-            </div>
+        <div className="settings-panel__section">
+          <h3 className="settings-panel__section-title">Refresh</h3>
+          <FormField label="Auto-refresh interval (minutes)" id="refresh-interval" helpText="Set to 0 to disable">
+            <Input
+              id="refresh-interval"
+              type="number"
+              min="0"
+              max="60"
+              step="1"
+              value={preferences.refreshInterval}
+              onChange={(e) => {
+                const newPrefs = {
+                  ...preferences,
+                  refreshInterval: Number(e.target.value),
+                };
+                onSavePreferences(newPrefs);
+              }}
+            />
           </FormField>
+        </div>
 
-          <div>
-            <label className={styles.settingsPanel__label}>Test Notifications</label>
-            <div className={styles.settingsPanel__testButtons}>
-              <button
-                type="button"
-                onClick={() => onTestNotification('low')}
-                className={styles.settingsPanel__testButton}
-              >
-                ⚠️ Test Low Alert
-              </button>
-              <button
-                type="button"
-                onClick={() => onTestNotification('high')}
-                className={`${styles.settingsPanel__testButton} ${styles.settingsPanel__testButtonHigh}`}
-              >
-                🔴 Test High Alert
-              </button>
+        {onTestNotification && (
+          <div className="settings-panel__section">
+            <h3 className="settings-panel__section-title">Notifications</h3>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <Button size="small" onClick={() => onTestNotification('low')}>
+                Test Low Alert
+              </Button>
+              <Button size="small" onClick={() => onTestNotification('high')}>
+                Test High Alert
+              </Button>
             </div>
-            <p className={styles.settingsPanel__help}>
-              Preview what the notifications will look like
-            </p>
           </div>
-        </div>
+        )}
 
-        <div className={styles.settingsPanel__actions}>
-          <Button onClick={onClose} variant="default">
-            Cancel
-          </Button>
-          <Button onClick={handleSave} variant="primary">
-            Save Settings
-          </Button>
+        <div className="settings-panel__section">
+          <h3 className="settings-panel__section-title">Units</h3>
+          <p className="settings-panel__info">
+            Glucose units are automatically detected from your LibreLinkUp account settings.
+          </p>
         </div>
+      </div>
+
+      <div className="settings-panel__footer">
+        <Button onClick={onClose}>Cancel</Button>
+        <Button variant="primary" onClick={handleSave}>
+          Save Changes
+        </Button>
       </div>
     </div>
   );
 });
 
 export default SettingsPanel;
-export type { UserPreferences };

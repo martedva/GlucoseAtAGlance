@@ -3,6 +3,7 @@
 // expect(element).toHaveTextContent(/react/i)
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom';
+import { vi } from 'vitest';
 
 // Storage data persists across test runs
 const storageData: Record<string, unknown> = {};
@@ -16,7 +17,7 @@ const mockCalls = {
 };
 
 // Create mock functions once - these persist across tests
-const mockGet = jest.fn((keys: string[] | string): Promise<Record<string, unknown>> => {
+const mockGet = vi.fn((keys: string[] | string): Promise<Record<string, unknown>> => {
   mockCalls.get.push({ keys });
   const result: Record<string, unknown> = {};
   const keyList = Array.isArray(keys) ? keys : [keys];
@@ -30,13 +31,13 @@ const mockGet = jest.fn((keys: string[] | string): Promise<Record<string, unknow
   return Promise.resolve(result);
 });
 
-const mockSet = jest.fn((items: Record<string, unknown>): Promise<void> => {
+const mockSet = vi.fn((items: Record<string, unknown>): Promise<void> => {
   mockCalls.set.push({ items });
   Object.assign(storageData, items);
   return Promise.resolve();
 });
 
-const mockRemove = jest.fn((keys: string[]): Promise<void> => {
+const mockRemove = vi.fn((keys: string[]): Promise<void> => {
   mockCalls.remove.push({ keys });
   for (const key of keys) {
     delete storageData[key];
@@ -44,7 +45,7 @@ const mockRemove = jest.fn((keys: string[]): Promise<void> => {
   return Promise.resolve();
 });
 
-const mockSendMessage = jest.fn((message: unknown, callback: (response: unknown) => void) => {
+const mockSendMessage = vi.fn((message: unknown, callback: (response: unknown) => void) => {
   mockCalls.sendMessage.push({ message });
   callback({});
 });
@@ -56,7 +57,7 @@ global.chrome = {
       get: mockGet,
       set: mockSet,
       remove: mockRemove,
-      clear: jest.fn((): Promise<void> => {
+      clear: vi.fn((): Promise<void> => {
         Object.keys(storageData).forEach((key) => {
           delete storageData[key];
         });
@@ -68,17 +69,17 @@ global.chrome = {
     sendMessage: mockSendMessage,
     lastError: undefined,
     onMessage: {
-      addListener: jest.fn(),
+      addListener: vi.fn(),
     },
   },
   alarms: {
-    create: jest.fn(),
+    create: vi.fn(),
     onAlarm: {
-      addListener: jest.fn(),
+      addListener: vi.fn(),
     },
   },
   action: {
-    setIcon: jest.fn(),
+    setIcon: vi.fn(),
   },
 } as unknown as typeof chrome;
 

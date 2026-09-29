@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import styles from './AlertBanner.module.scss';
+import './AlertBanner.css';
 
 export type AlertVariant = 'success' | 'warning' | 'error' | 'info';
 
@@ -23,19 +23,17 @@ const AlertBanner = memo(function AlertBanner({
   className = '',
 }: AlertBannerProps) {
   const classNames = [
-    styles.alertBanner,
-    styles[`alert-banner--${variant}`],
+    'alert-banner',
+    `alert-banner--${variant}`,
     className,
-  ]
-    .filter(Boolean)
-    .join(' ');
+  ].filter(Boolean).join(' ');
 
   return (
     <div className={classNames} role="status" aria-live="polite" aria-atomic="true">
-      {icon && <span className={styles.alertBanner__icon}>{icon}</span>}
-      <div className={styles.alertBanner__content}>
-        <span className={styles.alertBanner__text}>{text}</span>
-        {subtext && <span className={styles.alertBanner__subtext}>{subtext}</span>}
+      {icon && <span className="alert-banner__icon">{icon}</span>}
+      <div className="alert-banner__content">
+        <span className="alert-banner__text">{text}</span>
+        {subtext && <span className="alert-banner__subtext">{subtext}</span>}
       </div>
     </div>
   );

@@ -1,91 +1,21 @@
 import { memo } from 'react';
 import { Icon } from '@/components/atoms';
-import { predictGlucoseTrend } from '@/utils/trend-prediction';
+import type { TransformedGraphDataPoint } from '@/hooks/useGlucoseData';
 import type { SensorExpiryStatus } from '@/hooks/useSensorExpiry';
-import styles from './GlucoseDisplay.module.scss';
-
-interface GraphDataPoint {
-  time: Date;
-  value: number;
-  trendArrow?: number;
-}
+import './GlucoseDisplay.css';
 
 export interface GlucoseDisplayProps {
   glucose?: number;
   daysToExpire: number | null;
   sensorStatus: SensorExpiryStatus;
-  graphData?: GraphDataPoint[];
+  graphData: TransformedGraphDataPoint[];
   currentTrendArrow?: number;
+  uom: number; // 0 = mg/dL, 1 = mmol/L
 }
-
-const getExpiryClassName = (status: SensorExpiryStatus): string => {
-  switch (status) {
-    case 'critical':
-      return styles.critical;
-    case 'warning':
-      return styles.warning;
-    default:
-      return '';
-  }
-};
-
-const getSensorStatusLabel = (status: SensorExpiryStatus): string => {
-  switch (status) {
-    case 'critical':
-      return 'Critical - sensor expiring soon';
-    case 'warning':
-      return 'Warning - sensor expiring in a few days';
-    default:
-      return 'Normal - sensor operating normally';
-  }
-};
-
-const getTrendArrowFromApi = (arrowCode: number | undefined): string | null => {
-  if (arrowCode === undefined) return null;
-  switch (arrowCode) {
-    case 1:
-      return '↓';
-    case 2:
-      return '↘️';
-    case 3:
-      return '→';
-    case 4:
-      return '↗️';
-    case 5:
-      return '↑';
-    default:
-      return '→';
-  }
-};
-
-const getTrendDescriptionFromApi = (arrowCode: number | undefined): string => {
-  if (arrowCode === undefined) return 'stable';
-  switch (arrowCode) {
-    case 1:
-      return 'falling fast';
-    case 2:
-      return 'falling';
-    case 3:
-      return 'stable';
-    case 4:
-      return 'rising';
-    case 5:
-      return 'rising fast';
-    default:
-      return 'stable';
-  }
-};
-
-const getTrendColorClass = (arrowCode: number | undefined): string => {
-  if (arrowCode === undefined) return styles.stable;
-  if (arrowCode >= 4) return styles.rising;
-  if (arrowCode <= 2) return styles.falling;
-  return styles.stable;
-};
 
 /**
  * Organism GlucoseDisplay component
- * Shows current glucose value, sensor expiry, and trend
+ * Shows current glucose value with trend arrow and sensor info
  */
 const GlucoseDisplay = memo(function GlucoseDisplay({
   glucose,
@@ -93,60 +23,87 @@ const GlucoseDisplay = memo(function GlucoseDisplay({
   sensorStatus,
   graphData,
   currentTrendArrow,
+  uom,
 }: GlucoseDisplayProps) {
-  const trendArrow = getTrendArrowFromApi(currentTrendArrow);
-  const trendDescription = getTrendDescriptionFromApi(currentTrendArrow);
-  const trendColorClass = getTrendColorClass(currentTrendArrow);
+  if (glucose === undefined) return null;
 
-  const predictedGlucose15min =
-    graphData && graphData.length > 0
-      ? (glucose ?? 0) + (predictGlucoseTrend(graphData)?.predictedChange15min ?? 0)
-      : null;
+  // Get trend arrow display
+  const trendIcon = getTrendIcon(currentTrendArrow);
+  const trendClass = getTrendClass(currentTrendArrow);
+
+  // Calculate delta (change from previous reading) - round to avoid decimals
+  const delta = graphData.length >= 2
+    ? Math.round(graphData[graphData.length - 1].value - graphData[graphData.length - 2].value)
+    : 0;
+
+  // Get latest reading time
+  const latestTime = graphData.length > 0
+    ? graphData[graphData.length - 1].time
+    : new Date();
+
+  // Sensor expiry status display
+  const sensorStatusDisplay = getSensorStatusDisplay(daysToExpire, sensorStatus);
+
+  // Unit display (0 = mmol/L, 1 = mg/dL)
+  const unit = uom === 0 ? 'mmol/L' : 'mg/dL';
 
   return (
-    <div className={styles.glucoseDisplay} role="region" aria-label="Glucose monitoring display">
-      <div className={styles.glucoseDisplay__main}>
-        <h3 className={styles.glucoseDisplay__value} aria-live="polite" aria-atomic="true">
-          {glucose?.toFixed(1) ?? '--'} mmol/L
-        </h3>
-        {trendArrow && (
-          <Icon
-            size="medium"
-            variant={
-              currentTrendArrow && currentTrendArrow >= 4
-                ? 'trend-up'
-                : currentTrendArrow && currentTrendArrow <= 2
-                  ? 'trend-down'
-                  : 'trend-stable'
-            }
-            className={styles.glucoseDisplay__trend}
-            aria-label={`Glucose trend: ${trendDescription}`}
-            title={trendDescription}
-          >
-            {trendArrow}
-          </Icon>
+    <div className="glucose-display" role="region" aria-label="Current glucose reading">
+      {/* Header row: Live data indicator + sensor status + time */}
+      <div className="glucose-display__header">
+        <span className="glucose-display__live-indicator">
+          ✅ Live data
+        </span>
+        {sensorStatusDisplay && (
+          <span className="glucose-display__sensor-status">
+            {sensorStatusDisplay}
+          </span>
+        )}
+        <span className="glucose-display__time">
+          {latestTime.toLocaleTimeString()}
+        </span>
+      </div>
+
+      {/* Main glucose value */}
+      <div className="glucose-display__value" aria-live="polite">
+        {glucose}
+        <span className="glucose-display__unit"> {unit}</span>
+      </div>
+
+      {/* Trend row: arrow + delta */}
+      <div className={`glucose-display__trend ${trendClass}`}>
+        <Icon variant={trendIcon} size="large">
+          {trendIcon === 'trend-up' ? '↑' : trendIcon === 'trend-down' ? '↓' : '→'}
+        </Icon>
+        {delta !== 0 && (
+          <span className="glucose-display__delta">
+            {delta > 0 ? '+' : ''}
+            {delta} {unit}/5min
+          </span>
         )}
       </div>
-      {daysToExpire !== null && (
-        <p
-          className={`${styles.glucoseDisplay__sensorExpiry} ${getExpiryClassName(sensorStatus)}`}
-          aria-label={`Sensor expiry: ${getSensorStatusLabel(sensorStatus)}, ${daysToExpire} day${daysToExpire !== 1 ? 's' : ''} remaining`}
-        >
-          Sensor ends in {daysToExpire} day{daysToExpire !== 1 ? 's' : ''}
-        </p>
-      )}
-      {currentTrendArrow !== undefined && (
-        <p
-          className={`${styles.glucoseDisplay__trendDescription} ${trendColorClass}`}
-          aria-label={`Predicted glucose trend: ${trendDescription}`}
-        >
-          {trendDescription.charAt(0).toUpperCase() + trendDescription.slice(1)}{' '}
-          {predictedGlucose15min !== null &&
-            ` (${predictedGlucose15min.toFixed(1)} mmol/L in 15 min)`}
-        </p>
-      )}
     </div>
   );
 });
+
+function getTrendIcon(arrow: number | undefined): 'trend-up' | 'trend-down' | 'trend-stable' {
+  if (!arrow) return 'trend-stable';
+  // 1=down, 2=right-down, 3=right, 4=right-up, 5=up
+  if (arrow <= 2) return 'trend-down';
+  if (arrow >= 4) return 'trend-up';
+  return 'trend-stable';
+}
+
+function getTrendClass(arrow: number | undefined): string {
+  const icon = getTrendIcon(arrow);
+  return `glucose-display__trend--${icon}`;
+}
+
+function getSensorStatusDisplay(daysToExpire: number | null, status: SensorExpiryStatus): string | null {
+  if (daysToExpire === null) return null;
+  if (status === 'critical') return `⚠️ Expires in ${daysToExpire}d`;
+  if (status === 'warning') return `Expires in ${daysToExpire}d`;
+  return null;
+}
 
 export default GlucoseDisplay;

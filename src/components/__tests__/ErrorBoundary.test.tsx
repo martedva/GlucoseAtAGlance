@@ -1,5 +1,17 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import ErrorBoundary from '../ErrorBoundary';
+
+// Mock window.location.reload
+const mockReload = vi.fn();
+Object.defineProperty(window, 'location', {
+  value: { reload: mockReload },
+  writable: true,
+});
+
+beforeEach(() => {
+  mockReload.mockClear();
+});
 
 // Component that throws an error for testing
 const ThrowError = ({ message }: { message: string }) => {
@@ -19,7 +31,7 @@ describe('ErrorBoundary', () => {
 
   it('should render fallback UI when there is an error', () => {
     // Temporarily suppress console.error for this test
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     render(
       <ErrorBoundary fallback={<div data-testid="fallback">Custom fallback</div>}>
@@ -34,7 +46,7 @@ describe('ErrorBoundary', () => {
   });
 
   it('should render default error UI when no fallback is provided', () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     render(
       <ErrorBoundary>
@@ -50,8 +62,8 @@ describe('ErrorBoundary', () => {
   });
 
   it('should call onError callback when error occurs', () => {
-    const onError = jest.fn();
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    const onError = vi.fn();
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     render(
       <ErrorBoundary fallback={<div>Fallback</div>} onError={onError}>
@@ -66,9 +78,9 @@ describe('ErrorBoundary', () => {
   });
 
   it('should allow retry after error', () => {
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    const shouldThrow = true;
+    let shouldThrow = true;
     const ConditionalThrow = () => {
       if (shouldThrow) {
         throw new Error('Test error');
@@ -85,11 +97,10 @@ describe('ErrorBoundary', () => {
     expect(screen.getByText(/Something went wrong/)).toBeInTheDocument();
 
     const retryButton = screen.getByText(/Refresh Page/);
-    retryButton.click();
+    fireEvent.click(retryButton);
 
     // After retry, the page reloads (window.location.reload is called)
-    // In real usage, this would refresh the page to reset state
-    expect(window.location.reload).toBeDefined();
+    expect(mockReload).toHaveBeenCalled();
 
     consoleErrorSpy.mockRestore();
   });

@@ -1,108 +1,108 @@
 import { memo, useState } from 'react';
 import { Button, Input } from '@/components/atoms';
-import { authService } from '@/services/authService';
-import styles from './LoginForm.module.scss';
+import { AlertBanner } from '@/components/molecules';
+import './LoginForm.css';
 
 export interface LoginFormProps {
   onLoginSuccess: () => void;
-  onError: (error: string) => void;
+  onError: () => void;
 }
 
 /**
  * Organism LoginForm component
- * User authentication form with email and password
+ * Handles user authentication
  */
 const LoginForm = memo(function LoginForm({ onLoginSuccess, onError }: LoginFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (!email || !password) {
+      setError('Please enter both email and password');
+      onError();
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      await authService.login(email, password);
+      await new Promise<void>((resolve, reject) => {
+        chrome.runtime.sendMessage(
+          {
+            action: 'Login',
+            email,
+            password,
+          },
+          (response: { success?: boolean; error?: string }) => {
+            if (chrome.runtime.lastError) {
+              reject(new Error(chrome.runtime.lastError.message));
+            } else if (response.error) {
+              reject(new Error(response.error));
+            } else {
+              resolve();
+            }
+          }
+        );
+      });
+
       onLoginSuccess();
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : 'Login failed. Please check your credentials.';
+      const errorMessage = err instanceof Error ? err.message : 'Login failed';
       setError(errorMessage);
-      onError(errorMessage);
+      onError();
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className={styles.loginFormContainer} role="main" aria-label="Login form">
-      <div className={styles.loginFormWrapper}>
-        <h2 className={styles.loginForm__title}>Glucose At A Glance</h2>
-        <p className={styles.loginForm__subtitle}>Sign in with your LibreLinkUp account</p>
+    <form className="login-form" onSubmit={handleSubmit} aria-label="Login form">
+      <h1 className="login-form__title">Welcome Back</h1>
+      <p className="login-form__description">
+        Sign in to view your glucose data
+      </p>
 
-        <form onSubmit={handleSubmit} className={styles.loginForm} aria-describedby="login-help">
-          <div className={styles.loginForm__group}>
-            <label htmlFor="email" className={styles.loginForm__label}>
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="your@email.com"
-              required
-              disabled={isLoading}
-              autoComplete="username"
-              aria-required="true"
-              aria-invalid={!!error}
-              className={styles.loginForm__input}
-            />
-          </div>
-
-          <div className={styles.loginForm__group}>
-            <label htmlFor="password" className={styles.loginForm__label}>
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Your password"
-              required
-              disabled={isLoading}
-              autoComplete="current-password"
-              aria-required="true"
-              aria-invalid={!!error}
-              className={styles.loginForm__input}
-            />
-          </div>
-
-          {error && (
-            <div className={styles.loginForm__error} role="alert" aria-live="assertive" aria-atomic="true">
-              {error}
-            </div>
-          )}
-
-          <Button
-            type="submit"
-            variant="primary"
-            className={styles.loginForm__button}
-            disabled={isLoading}
-            aria-busy={isLoading}
-          >
-            {isLoading ? 'Signing in...' : 'Sign In'}
-          </Button>
-        </form>
-
-        <p id="login-help" className={styles.loginForm__help}>
-          Your credentials are stored locally and never sent to third parties.
-        </p>
+      <div className="login-form__fields">
+        <Input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Email"
+          disabled={isLoading}
+          autoComplete="email"
+          aria-label="Email address"
+        />
+        <Input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Password"
+          disabled={isLoading}
+          autoComplete="current-password"
+          aria-label="Password"
+        />
       </div>
-    </div>
+
+      <Button
+        type="submit"
+        variant="primary"
+        className="login-form__submit"
+        disabled={isLoading}
+      >
+        {isLoading ? 'Signing in...' : 'Sign In'}
+      </Button>
+
+      {error && (
+        <div className="login-form__error">
+          <AlertBanner variant="error" text={error} />
+        </div>
+      )}
+    </form>
   );
 });
 

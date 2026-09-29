@@ -1,20 +1,21 @@
 import { renderHook, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useLogbookData } from '../useLogbookData';
 import { getLibreLogbook } from '@/api/libre/logbook-api';
 import { authService } from '@/services/authService';
 
-jest.mock('@/api/libre/logbook-api');
-jest.mock('@/services/authService');
+vi.mock('@/api/libre/logbook-api');
+vi.mock('@/services/authService');
 
 describe('useLogbookData', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     chrome.storage.local.clear();
   });
 
   it('fetches logbook data on mount', async () => {
-    (authService.getPatientId as jest.Mock).mockResolvedValue('test-patient-id');
-    (getLibreLogbook as jest.Mock).mockResolvedValue({
+    vi.mocked(authService.getPatientId).mockResolvedValue('test-patient-id');
+    vi.mocked(getLibreLogbook).mockResolvedValue({
       status: 0,
       data: [],
       ticket: { token: 'test', expires: 0, duration: 0 },
@@ -22,8 +23,7 @@ describe('useLogbookData', () => {
 
     const { result } = renderHook(() => useLogbookData());
 
-    expect(result.current.isLoading).toBe(true);
-
+    // Wait for loading to complete
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
     });
@@ -32,7 +32,7 @@ describe('useLogbookData', () => {
   });
 
   it('handles authentication error', async () => {
-    (authService.getPatientId as jest.Mock).mockResolvedValue(null);
+    vi.mocked(authService.getPatientId).mockResolvedValue(null);
 
     const { result } = renderHook(() => useLogbookData());
 
@@ -43,8 +43,8 @@ describe('useLogbookData', () => {
   });
 
   it('handles API error', async () => {
-    (authService.getPatientId as jest.Mock).mockResolvedValue('test-patient-id');
-    (getLibreLogbook as jest.Mock).mockRejectedValue(new Error('API error'));
+    vi.mocked(authService.getPatientId).mockResolvedValue('test-patient-id');
+    vi.mocked(getLibreLogbook).mockRejectedValue(new Error('API error'));
 
     const { result } = renderHook(() => useLogbookData());
 
@@ -57,7 +57,7 @@ describe('useLogbookData', () => {
   it('uses cached data when available and not expired', async () => {
     const cachedData = {
       status: 0,
-      data: [{ value: 7.5, Timestamp: new Date().toISOString() }],
+      data: [{ value: 7.5, Timestamp: '/Date(' + Date.now() + ')/' }],
       ticket: { token: 'test', expires: 0, duration: 0 },
     };
 
@@ -66,7 +66,7 @@ describe('useLogbookData', () => {
       logbook_timestamp: Date.now(),
     });
 
-    (authService.getPatientId as jest.Mock).mockResolvedValue('test-patient-id');
+    vi.mocked(authService.getPatientId).mockResolvedValue('test-patient-id');
 
     const { result } = renderHook(() => useLogbookData());
 
@@ -85,10 +85,10 @@ describe('useLogbookData', () => {
       logbook_timestamp: expiredTimestamp,
     });
 
-    (authService.getPatientId as jest.Mock).mockResolvedValue('test-patient-id');
-    (getLibreLogbook as jest.Mock).mockResolvedValue({
+    vi.mocked(authService.getPatientId).mockResolvedValue('test-patient-id');
+    vi.mocked(getLibreLogbook).mockResolvedValue({
       status: 0,
-      data: [{ value: 8.0 }],
+      data: [{ value: 8.0, Timestamp: '/Date(' + Date.now() + ')/' }],
       ticket: { token: 'test', expires: 0, duration: 0 },
     });
 

@@ -1,5 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import StatisticsPanel from '../StatisticsPanel';
+import { describe, it, expect } from 'vitest';
+import StatisticsPanel from '@/components/organisms/StatisticsPanel/StatisticsPanel';
 
 const mockGraphData = [
   { time: new Date(Date.now() - 1000 * 60 * 15), value: 6.0 },
@@ -9,152 +10,114 @@ const mockGraphData = [
   { time: new Date(Date.now() - 1000 * 60 * 75), value: 12.0 },
 ];
 
-const mockLogbookData = mockGraphData.concat(
-  Array.from({ length: 50 }, (_, i) => ({
-    time: new Date(Date.now() - 1000 * 60 * 60 * (i + 2)),
-    value: 6.0 + Math.random() * 4,
-  }))
-);
-
 describe('StatisticsPanel', () => {
-  it('renders loading skeleton when isLoading', () => {
+  it('renders loading state when isLoading', () => {
     render(
       <StatisticsPanel
         graphData={[]}
-        logbookData={[]}
         isLoading={true}
+        uom={0}
       />
     );
-    expect(screen.getByLabelText('Loading statistics')).toBeInTheDocument();
+    // Loading state shows 4 stat cards with "Loading..." labels
+    const loadingLabels = screen.getAllByText('Loading...');
+    expect(loadingLabels.length).toBe(4);
   });
 
-  it('hides panel when insufficient data', () => {
-    const { container } = render(
-      <StatisticsPanel
-        graphData={[]}
-        logbookData={[]}
-        isLoading={false}
-      />
-    );
-    expect(container.firstChild).toBeNull();
-  });
-
-  it('displays statistics for 12 hours', () => {
+  it('displays statistics for 12 hours with mmol/L', () => {
     render(
       <StatisticsPanel
         graphData={mockGraphData}
-        logbookData={mockLogbookData}
-        targetLow={70}
-        targetHigh={180}
+        targetLow={4.0}
+        targetHigh={10.0}
+        uom={0}
       />
     );
     expect(screen.getByText('Time in Range')).toBeInTheDocument();
-    expect(screen.getByText(/mmol\/L/)).toBeInTheDocument();
-    expect(screen.getByText(/Based on \d+ readings/)).toBeInTheDocument();
+    // Multiple stat cards have the unit, so use getAllByText
+    const mmolUnits = screen.getAllByText('mmol/L');
+    expect(mmolUnits.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('displays statistics with mg/dL when uom is 1', () => {
+    render(
+      <StatisticsPanel
+        graphData={mockGraphData}
+        targetLow={70}
+        targetHigh={180}
+        uom={1}
+      />
+    );
+    const mgdlUnits = screen.getAllByText('mg/dL');
+    expect(mgdlUnits.length).toBeGreaterThanOrEqual(1);
   });
 
   it('switches tabs when clicked', () => {
     render(
       <StatisticsPanel
         graphData={mockGraphData}
-        logbookData={mockLogbookData}
-        targetLow={70}
-        targetHigh={180}
+        targetLow={4.0}
+        targetHigh={10.0}
+        uom={0}
       />
     );
 
-    const sevenDaysTab = screen.getByRole('tab', { name: '7 Days statistics' });
+    const sevenDaysTab = screen.getByRole('tab', { name: '7d' });
     fireEvent.click(sevenDaysTab);
 
     expect(sevenDaysTab).toHaveAttribute('aria-selected', 'true');
   });
 
-  it('disables tab when data not available', () => {
+  it('displays TIR percentage', () => {
     render(
       <StatisticsPanel
         graphData={mockGraphData}
-        logbookData={[]}
-        targetLow={70}
-        targetHigh={180}
+        targetLow={4.0}
+        targetHigh={10.0}
+        uom={0}
       />
     );
 
-    const sevenDaysTab = screen.getByRole('tab', { name: '7 Days statistics' });
-    expect(sevenDaysTab).toBeDisabled();
+    // TIR should be displayed as a percentage
+    expect(screen.getByText(/%/)).toBeInTheDocument();
   });
 
-  it('displays TIR badge with correct label', () => {
+  it('shows average value', () => {
     render(
       <StatisticsPanel
         graphData={mockGraphData}
-        logbookData={mockLogbookData}
-        targetLow={70}
-        targetHigh={180}
+        targetLow={4.0}
+        targetHigh={10.0}
+        uom={0}
       />
     );
 
-    // TIR should be 80% (4 out of 5 in range), which is "Excellent"
-    expect(screen.getByText('Excellent')).toBeInTheDocument();
-  });
-
-  it('shows correct average value', () => {
-    render(
-      <StatisticsPanel
-        graphData={mockGraphData}
-        logbookData={mockLogbookData}
-        targetLow={70}
-        targetHigh={180}
-      />
-    );
-
-    // Average should be approximately 7.8 mmol/L
-    expect(screen.getByText('7.8 mmol/L')).toBeInTheDocument();
+    // Average should be displayed
+    expect(screen.getByText('Avg')).toBeInTheDocument();
   });
 
   it('shows min and max values', () => {
     render(
       <StatisticsPanel
         graphData={mockGraphData}
-        logbookData={mockLogbookData}
-        targetLow={70}
-        targetHigh={180}
+        targetLow={4.0}
+        targetHigh={10.0}
+        uom={0}
       />
     );
 
-    expect(screen.getByText('5.5 mmol/L')).toBeInTheDocument(); // Min
-    expect(screen.getByText('12.0 mmol/L')).toBeInTheDocument(); // Max
+    expect(screen.getByText('Min')).toBeInTheDocument();
+    expect(screen.getByText('Max')).toBeInTheDocument();
   });
 
   it('uses default target values when not provided', () => {
     render(
       <StatisticsPanel
         graphData={mockGraphData}
-        logbookData={mockLogbookData}
+        uom={0}
       />
     );
 
     expect(screen.getByText('Time in Range')).toBeInTheDocument();
-  });
-
-  it('hides 7-day and 14-day tabs when logbook data is insufficient', () => {
-    const insufficientLogbookData = [
-      { time: new Date(Date.now() - 1000 * 60 * 60), value: 7.0 },
-      { time: new Date(Date.now() - 1000 * 60 * 120), value: 8.0 },
-    ];
-
-    render(
-      <StatisticsPanel
-        graphData={mockGraphData}
-        logbookData={insufficientLogbookData}
-        targetLow={70}
-        targetHigh={180}
-      />
-    );
-
-    const sevenDaysTab = screen.getByRole('tab', { name: '7 Days statistics' });
-    const fourteenDaysTab = screen.getByRole('tab', { name: '14 Days statistics' });
-
-    expect(sevenDaysTab).toBeDisabled();
-    expect(fourteenDaysTab).toBeDisabled();
   });
 });

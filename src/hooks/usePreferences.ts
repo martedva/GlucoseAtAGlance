@@ -1,11 +1,17 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { UserPreferences } from '@/components/SettingsPanel';
+
+export interface UserPreferences {
+  refreshInterval: number;
+  notificationsEnabled: boolean;
+  predictionPeriod?: number;
+}
 
 const STORAGE_KEY = 'user_preferences';
 
 const DEFAULT_PREFERENCES: UserPreferences = {
   refreshInterval: 5,
   notificationsEnabled: false,
+  predictionPeriod: 15,
 };
 
 interface UsePreferencesReturn {

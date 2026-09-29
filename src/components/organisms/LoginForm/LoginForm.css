@@ -1,0 +1,41 @@
+/* LoginForm Component Styles */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  padding: var(--spacing-4);
+  width: 100%;
+  max-width: 320px;
+  margin: var(--spacing-6) auto;
+}
+
+.login-form__title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-gray-900);
+  text-align: center;
+  margin-bottom: var(--spacing-2);
+}
+
+.login-form__description {
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-600);
+  text-align: center;
+  margin-bottom: var(--spacing-3);
+}
+
+.login-form__fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.login-form__submit {
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-4);
+  margin-top: var(--spacing-2);
+}
+
+.login-form__error {
+  margin-top: var(--spacing-2);
+}

@@ -1,0 +1,4 @@
+/* ConnectionStatusIndicator Component Styles */
+.connection-status {
+  margin-bottom: var(--spacing-3);
+}

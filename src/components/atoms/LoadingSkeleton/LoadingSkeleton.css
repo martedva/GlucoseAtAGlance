@@ -1,14 +1,14 @@
-
+/* LoadingSkeleton Component Styles */
 .loading-skeleton {
   background: linear-gradient(
     90deg,
-    $color-gray-100 25%,
-    $color-gray-200 50%,
-    $color-gray-100 75%
+    var(--color-gray-100) 25%,
+    var(--color-gray-200),
+    var(--color-gray-100) 75%
   );
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
-  border-radius: $radius-md;
+  border-radius: var(--radius-md);
 }
 
 @keyframes shimmer {

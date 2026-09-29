@@ -1,10 +1,11 @@
 import { memo, LabelHTMLAttributes } from 'react';
-import styles from './Label.module.scss';
+import './Label.css';
 
 export interface LabelProps extends LabelHTMLAttributes<HTMLLabelElement> {
   children: React.ReactNode;
   required?: boolean;
   inline?: boolean;
+  className?: string;
 }
 
 /**
@@ -19,13 +20,11 @@ const Label = memo(function Label({
   ...props
 }: LabelProps) {
   const classNames = [
-    styles.label,
-    inline && styles['label--inline'],
-    required && styles['label--required'],
+    'label',
+    inline && 'label--inline',
+    required && 'label--required',
     className,
-  ]
-    .filter(Boolean)
-    .join(' ');
+  ].filter(Boolean).join(' ');
 
   return (
     <label className={classNames} {...props}>

@@ -1,5 +1,5 @@
 import { memo, ReactNode } from 'react';
-import styles from './FormField.module.scss';
+import './FormField.css';
 
 export interface FormFieldProps {
   label: string;
@@ -14,12 +14,12 @@ export interface FormFieldProps {
  */
 const FormField = memo(function FormField({ label, helpText, children, id }: FormFieldProps) {
   return (
-    <div className={styles.formField}>
-      <label htmlFor={id} className={styles.formField__label}>
+    <div className="form-field">
+      <label htmlFor={id} className="form-field__label">
         {label}
       </label>
       {children}
-      {helpText && <p className={styles.formField__help}>{helpText}</p>}
+      {helpText && <p className="form-field__help">{helpText}</p>}
     </div>
   );
 });

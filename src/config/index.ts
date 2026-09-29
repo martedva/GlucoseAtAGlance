@@ -84,7 +84,7 @@ export const getGlucoseColor = (code: number): string | undefined => {
 };
 
 export const getIconPath = (color: string, arrow: string, size: number): string => {
-  return chrome.runtime.getURL(`static/assets/icons/${color}-${arrow}-${size}.png`);
+  return chrome.runtime.getURL(`assets/icons/${color}-${arrow}-${size}.png`);
 };
 
 export const getIconPaths = (color: string, arrow: string): Record<string, string> => {

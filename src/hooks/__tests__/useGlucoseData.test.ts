@@ -1,4 +1,5 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { LibreViewResponse } from '@/types/api';
 import { cleanupChromeMocks, getMockChromeRuntime } from '../../test-utils';
 import { useGlucoseData } from '../useGlucoseData';
@@ -16,8 +17,8 @@ const mockGlucoseData: LibreViewResponse['data'] = {
     uom: 1,
     sensor: {
       sn: 'SN123456',
-      a: Math.floor(Date.now() / 1000 - 7 * 24 * 60 * 60), // 7 days ago
-      e: Math.floor(Date.now() / 1000 + 7 * 24 * 60 * 60), // 7 days from now
+      a: Math.floor(Date.now() / 1000 - 7 * 24 * 60 * 60),
+      e: Math.floor(Date.now() / 1000 + 7 * 24 * 60 * 60),
     },
     alarmRules: {
       c: false,
@@ -33,14 +34,14 @@ const mockGlucoseData: LibreViewResponse['data'] = {
       Value: 5.5,
       TrendArrow: 1,
       MeasurementColor: 1,
-      Timestamp: new Date(),
-    },
+      Timestamp: '/Date(' + Date.now() + ')/',
+    } as any,
     glucoseItem: {
       Value: 5.5,
       TrendArrow: 1,
       MeasurementColor: 1,
-      Timestamp: new Date(),
-    },
+      Timestamp: '/Date(' + Date.now() + ')/',
+    } as any,
     glucoseAlarm: 'none',
     patientDevice: {
       did: 'device-1',
@@ -62,23 +63,23 @@ const mockGlucoseData: LibreViewResponse['data'] = {
   },
   graphData: [
     {
-      Timestamp: new Date(Date.now() - 60 * 60 * 1000),
+      Timestamp: '/Date(' + (Date.now() - 60 * 60 * 1000) + ')/',
       Value: 5.2,
       TrendArrow: 1,
       MeasurementColor: 1,
-    },
+    } as any,
     {
-      Timestamp: new Date(Date.now() - 30 * 60 * 1000),
+      Timestamp: '/Date(' + (Date.now() - 30 * 60 * 1000) + ')/',
       Value: 5.5,
       TrendArrow: 1,
       MeasurementColor: 1,
-    },
+    } as any,
     {
-      Timestamp: new Date(),
+      Timestamp: '/Date(' + Date.now() + ')/',
       Value: 5.8,
       TrendArrow: 1,
       MeasurementColor: 1,
-    },
+    } as any,
   ],
   activeSensors: [
     {

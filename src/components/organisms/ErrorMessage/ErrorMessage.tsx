@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { Button } from '@/components/atoms';
-import styles from './ErrorMessage.module.scss';
+import './ErrorMessage.css';
 
 export interface ErrorMessageProps {
   error: string;
@@ -11,17 +11,16 @@ export interface ErrorMessageProps {
 /**
  * Organism ErrorMessage component
  * Error message display with retry button
- * Uses ARIA live region for screen reader announcements
  */
 const ErrorMessage = memo(function ErrorMessage({ error, onRetry, isRetrying }: ErrorMessageProps) {
   return (
-    <div className={styles.errorMessage} role="alert" aria-live="assertive" aria-atomic="true">
+    <div className="error-message" role="alert" aria-live="assertive" aria-atomic="true">
       {error}
       <Button
         variant="danger"
         size="small"
         onClick={onRetry}
-        className={styles.errorMessage__retryButton}
+        className="error-message__retry-button"
         aria-label="Retry loading glucose data"
         disabled={isRetrying}
       >

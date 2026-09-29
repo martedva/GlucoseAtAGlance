@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { AlertBanner } from '@/components/molecules';
 import type { ConnectionStatus } from '@/hooks/useConnectionStatus';
-import styles from './ConnectionStatusIndicator.module.scss';
+import './ConnectionStatusIndicator.css';
 
 export interface ConnectionStatusIndicatorProps {
   status: ConnectionStatus;
@@ -11,7 +11,6 @@ export interface ConnectionStatusIndicatorProps {
 /**
  * Organism ConnectionStatusIndicator component
  * Shows clear visual feedback about data freshness
- * Critical for medical safety - users must know if data is outdated
  */
 const ConnectionStatusIndicator = memo(function ConnectionStatusIndicator({
   status,
@@ -50,7 +49,7 @@ const ConnectionStatusIndicator = memo(function ConnectionStatusIndicator({
   const config = getStatusConfig();
 
   return (
-    <div className={styles.connectionStatus}>
+    <div className="connection-status">
       <AlertBanner
         variant={config.variant}
         icon={config.icon}

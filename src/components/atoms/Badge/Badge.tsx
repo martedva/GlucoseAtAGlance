@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import styles from './Badge.module.scss';
+import './Badge.css';
 
 export type BadgeVariant = 'success' | 'warning' | 'error' | 'info';
 
@@ -14,10 +14,7 @@ export interface BadgeProps {
  * Displays status labels with color coding
  */
 const Badge = memo(function Badge({ variant, children, className = '' }: BadgeProps) {
-  const classNames = [styles.badge, styles[`badge--${variant}`], className]
-    .filter(Boolean)
-    .join(' ');
-
+  const classNames = ['badge', `badge--${variant}`, className].filter(Boolean).join(' ');
   return <span className={classNames}>{children}</span>;
 });
 

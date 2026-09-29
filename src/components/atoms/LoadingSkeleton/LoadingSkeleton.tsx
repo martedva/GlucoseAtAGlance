@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import styles from './LoadingSkeleton.module.scss';
+import './LoadingSkeleton.css';
 
 export interface LoadingSkeletonProps {
   width?: string;
@@ -16,8 +16,7 @@ const LoadingSkeleton = memo(function LoadingSkeleton({
   height = '20px',
   className = '',
 }: LoadingSkeletonProps) {
-  const classNames = [styles.loadingSkeleton, className].filter(Boolean).join(' ');
-
+  const classNames = ['loading-skeleton', className].filter(Boolean).join(' ');
   return <div className={classNames} style={{ width, height }} />;
 });
 

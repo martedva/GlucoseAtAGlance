@@ -1,5 +1,5 @@
 import { memo, ButtonHTMLAttributes } from 'react';
-import styles from './Button.module.scss';
+import './Button.css';
 
 export type ButtonVariant = 'default' | 'primary' | 'secondary' | 'danger' | 'warning';
 export type ButtonSize = 'small' | 'medium' | 'icon';
@@ -23,14 +23,12 @@ const Button = memo(function Button({
   ...props
 }: ButtonProps) {
   const classNames = [
-    styles.button,
-    variant !== 'default' && styles[`button--${variant}`],
-    size === 'small' && styles['button--small'],
-    size === 'icon' && styles['button--icon'],
+    'btn',
+    `btn--${variant}`,
+    size === 'small' && 'btn--small',
+    size === 'icon' && 'btn--icon',
     className,
-  ]
-    .filter(Boolean)
-    .join(' ');
+  ].filter(Boolean).join(' ');
 
   return (
     <button

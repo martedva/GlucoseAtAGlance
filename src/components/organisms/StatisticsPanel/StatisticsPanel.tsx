@@ -1,164 +1,165 @@
-import { memo, useState, useMemo } from 'react';
-import { StatCard, TabButton } from '@/components/molecules';
-import { calculateGlucoseStats, filterDataByPeriod, getTirBadge } from '@/utils/glucose-stats';
-import type { GlucoseStats } from '@/utils/glucose-stats';
-import styles from './StatisticsPanel.module.scss';
+import { memo, useState } from 'react';
+import { TabButton } from '@/components/molecules';
+import { StatCard } from '@/components/molecules';
+import type { TransformedGraphDataPoint } from '@/hooks/useGlucoseData';
+import './StatisticsPanel.css';
 
-interface GraphDataPoint {
-  time: Date;
-  value: number;
-}
+export type StatisticsPeriod = '12h' | '7d' | '14d';
 
 export interface StatisticsPanelProps {
-  graphData: GraphDataPoint[];
-  logbookData: GraphDataPoint[];
+  graphData: TransformedGraphDataPoint[];
+  logbookData?: TransformedGraphDataPoint[];
   targetLow?: number;
   targetHigh?: number;
-  uom?: number;
-  isLoading?: boolean;
+  isLoading: boolean;
+  uom: number; // 0 = mg/dL, 1 = mmol/L
 }
 
-type TabType = '12h' | '7d' | '14d';
+interface Stats {
+  avg: number;
+  min: number;
+  max: number;
+  sd: number;
+  tir: number;
+  minDate?: Date;
+  maxDate?: Date;
+}
 
 /**
  * Organism StatisticsPanel component
- * Tabbed statistics panel showing Time in Range, Average, Min, Max glucose
+ * Shows glucose statistics for different time periods
  */
 const StatisticsPanel = memo(function StatisticsPanel({
   graphData,
-  logbookData,
   targetLow = 70,
   targetHigh = 180,
-  uom = 1,
-  isLoading = false,
+  isLoading,
+  uom,
 }: StatisticsPanelProps) {
-  const [activeTab, setActiveTab] = useState<TabType>('12h');
+  const [period, setPeriod] = useState<StatisticsPeriod>('12h');
 
-  const stats12h = useMemo(() => {
-    if (!graphData || graphData.length < 3) return null;
-    return calculateGlucoseStats(graphData, targetLow, targetHigh, 'Last 12 Hours', uom);
-  }, [graphData, targetLow, targetHigh, uom]);
+  const stats = calculateStatistics(graphData, period, targetLow, targetHigh);
+  const unit = uom === 0 ? 'mmol/L' : 'mg/dL';
 
-  const stats7d = useMemo(() => {
-    if (!logbookData || logbookData.length < 3) return null;
-    const filtered = filterDataByPeriod(logbookData, 7 * 24);
-    if (filtered.length < 3) return null;
-    return calculateGlucoseStats(filtered, targetLow, targetHigh, 'Last 7 Days', uom);
-  }, [logbookData, targetLow, targetHigh, uom]);
-
-  const stats14d = useMemo(() => {
-    if (!logbookData || logbookData.length < 3) return null;
-    const filtered = filterDataByPeriod(logbookData, 14 * 24);
-    if (filtered.length < 3) return null;
-    return calculateGlucoseStats(filtered, targetLow, targetHigh, 'Last 14 Days', uom);
-  }, [logbookData, targetLow, targetHigh, uom]);
-
-  const activeStats: GlucoseStats | null = useMemo(() => {
-    switch (activeTab) {
-      case '12h':
-        return stats12h;
-      case '7d':
-        return stats7d;
-      case '14d':
-        return stats14d;
-      default:
-        return stats12h;
-    }
-  }, [activeTab, stats12h, stats7d, stats14d]);
-
-  const tabs: Array<{ id: TabType; label: string; available: boolean }> = [
-    { id: '12h', label: '12 Hours', available: !!stats12h },
-    { id: '7d', label: '7 Days', available: !!stats7d },
-    { id: '14d', label: '14 Days', available: !!stats14d },
-  ];
-
-  const tirBadge = activeStats ? getTirBadge(activeStats.timeInRange) : null;
+  const periods: StatisticsPeriod[] = ['12h', '7d', '14d'];
 
   if (isLoading) {
     return (
-      <div className={styles.statisticsPanel} role="status" aria-label="Loading statistics">
-        <div className={styles.statisticsPanel__tabs}>
-          {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: '#f0f0f0',
-                borderRadius: '4px',
-                minWidth: '80px',
-                height: '32px',
-              }}
-              aria-hidden="true"
-            />
-          ))}
+      <div className="statistics-panel">
+        <div className="statistics-panel__header">
+          <h3 className="statistics-panel__title">Statistics</h3>
         </div>
-        <div className={styles.statisticsPanel__cards}>
+        <div className="statistics-panel__cards">
           {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              style={{
-                padding: '12px',
-                backgroundColor: '#f0f0f0',
-                borderRadius: '8px',
-                height: '80px',
-              }}
-              aria-hidden="true"
-            />
+            <div key={i} className="stat-card">
+              <div className="stat-card__label">Loading...</div>
+              <div className="stat-card__value">--</div>
+            </div>
           ))}
         </div>
       </div>
     );
   }
 
-  if (!activeStats) {
-    return null;
-  }
-
   return (
-    <div className={styles.statisticsPanel} role="region" aria-label="Glucose statistics">
-      <div className={styles.statisticsPanel__tabs} role="tablist" aria-label="Statistics time period">
-        {tabs.map((tab) => (
-          <TabButton
-            key={tab.id}
-            isActive={activeTab === tab.id}
-            onClick={() => tab.available && setActiveTab(tab.id)}
-            disabled={!tab.available}
-            aria-selected={activeTab === tab.id}
-            aria-label={`${tab.label} statistics`}
-          >
-            {tab.label}
-          </TabButton>
-        ))}
+    <div className="statistics-panel" role="region" aria-label="Glucose statistics">
+      <div className="statistics-panel__header">
+        <h3 className="statistics-panel__title">Statistics</h3>
+        <div className="statistics-panel__tabs" role="tablist">
+          {periods.map((p) => (
+            <TabButton
+              key={p}
+              isActive={period === p}
+              onClick={() => setPeriod(p)}
+              role="tab"
+              aria-selected={period === p}
+            >
+              {p}
+            </TabButton>
+          ))}
+        </div>
       </div>
 
-      <div className={styles.statisticsPanel__cards} role="tabpanel" aria-label={`${activeStats.periodLabel} statistics`}>
+      <div className="statistics-panel__cards">
         <StatCard
-          label="Time in Range"
-          value={`${activeStats.timeInRange.toFixed(0)}%`}
-          subtext={tirBadge?.label}
-        />
-        <StatCard
-          label="Average"
-          value={activeStats.averageGlucose.toFixed(1)}
-          unit="mmol/L"
+          label="Avg"
+          value={stats.avg.toFixed(1)}
+          unit={unit}
+          subtext={`SD: ${stats.sd.toFixed(1)}`}
         />
         <StatCard
           label="Min"
-          value={activeStats.minGlucose.toFixed(1)}
-          unit="mmol/L"
+          value={stats.min.toFixed(1)}
+          unit={unit}
+          subtext={stats.minDate?.toLocaleDateString()}
         />
         <StatCard
           label="Max"
-          value={activeStats.maxGlucose.toFixed(1)}
-          unit="mmol/L"
+          value={stats.max.toFixed(1)}
+          unit={unit}
+          subtext={stats.maxDate?.toLocaleDateString()}
+        />
+        <StatCard
+          label="TIR"
+          value={`${stats.tir.toFixed(0)}%`}
+          subtext="Time in Range"
         />
       </div>
-
-      <p className={styles.statisticsPanel__readingCount} aria-label={`Based on ${activeStats.readingsCount} readings`}>
-        Based on {activeStats.readingsCount} readings
-      </p>
     </div>
   );
 });
+
+function calculateStatistics(
+  data: TransformedGraphDataPoint[],
+  period: StatisticsPeriod,
+  targetLow: number,
+  targetHigh: number
+): Stats {
+  if (!data || data.length === 0) {
+    return { avg: 0, min: 0, max: 0, sd: 0, tir: 0 };
+  }
+
+  // Filter data by period
+  const now = Date.now();
+  const hours = period === '12h' ? 12 : period === '7d' ? 168 : 336;
+  const cutoffTime = now - (hours * 60 * 60 * 1000);
+  const filteredData = data.filter((d) => d.time.getTime() > cutoffTime);
+
+  if (filteredData.length === 0) {
+    return { avg: 0, min: 0, max: 0, sd: 0, tir: 0 };
+  }
+
+  const values = filteredData.map((d) => d.value);
+
+  // Calculate average
+  const avg = values.reduce((sum, val) => sum + val, 0) / values.length;
+
+  // Find min and max with dates
+  let min = values[0];
+  let max = values[0];
+  let minDate = filteredData[0].time;
+  let maxDate = filteredData[0].time;
+
+  for (let i = 1; i < values.length; i++) {
+    if (values[i] < min) {
+      min = values[i];
+      minDate = filteredData[i].time;
+    }
+    if (values[i] > max) {
+      max = values[i];
+      maxDate = filteredData[i].time;
+    }
+  }
+
+  // Calculate standard deviation
+  const variance = values.reduce((sum, val) => sum + Math.pow(val - avg, 2), 0) / values.length;
+  const sd = Math.sqrt(variance);
+
+  // Calculate time in range
+  const inRange = values.filter((v) => v >= targetLow && v <= targetHigh).length;
+  const tir = (inRange / values.length) * 100;
+
+  return { avg, min, max, sd, tir, minDate, maxDate };
+}
 
 export default StatisticsPanel;

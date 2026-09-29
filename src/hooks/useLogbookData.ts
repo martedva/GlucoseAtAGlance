@@ -1,7 +1,13 @@
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState, useEffect, useMemo } from 'react';
 import { getLibreLogbook } from '@/api/libre/logbook-api';
 import type { LogbookResponse } from '@/types/api';
+import { parseLibreTimestamp } from '@/types/api';
 import { authService } from '@/services/authService';
+
+export interface TransformedLogbookDataPoint {
+  time: Date;
+  value: number;
+}
 
 const CACHE_KEY = 'logbook_data';
 const CACHE_TIMESTAMP_KEY = 'logbook_timestamp';
@@ -9,6 +15,7 @@ const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes
 
 interface UseLogbookDataReturn {
   data: LogbookResponse | null;
+  logbookGraphData: TransformedLogbookDataPoint[];
   isLoading: boolean;
   error: string | null;
   fetchData: () => Promise<void>;
@@ -17,6 +24,7 @@ interface UseLogbookDataReturn {
 /**
  * Hook for fetching and caching logbook data from LibreLinkUp API
  * Caches data for 30 minutes to reduce API calls
+ * Transforms raw API data into graph-ready format
  */
 export function useLogbookData(): UseLogbookDataReturn {
   const [data, setData] = useState<LogbookResponse | null>(null);
@@ -70,8 +78,18 @@ export function useLogbookData(): UseLogbookDataReturn {
     fetchData();
   }, [fetchData]);
 
+  // Transform raw API data to graph-ready format
+  const logbookGraphData: TransformedLogbookDataPoint[] = useMemo(() => {
+    if (!data?.data) return [];
+    return data.data.map((item) => ({
+      time: parseLibreTimestamp(item.Timestamp),
+      value: item.Value,
+    }));
+  }, [data?.data]);
+
   return {
     data,
+    logbookGraphData,
     isLoading,
     error,
     fetchData,

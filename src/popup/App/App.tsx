@@ -1,40 +1,55 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import ConnectionStatusIndicator from '@/components/ConnectionStatusIndicator';
 import DevelopmentGraph from '@/components/DevelopmentGraph';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import ErrorMessage from '@/components/ErrorMessage';
 import GlucoseDisplay from '@/components/GlucoseDisplay';
+import HeaderActions from '@/components/HeaderActions';
 import LoginForm from '@/components/LoginForm';
 import SettingsPanel, { type UserPreferences } from '@/components/SettingsPanel';
 import StatisticsPanel from '@/components/StatisticsPanel';
-import { SENSOR_CONFIG, UI_CONFIG } from '@/config';
+import { UI_CONFIG } from '@/config';
 import {
   useAuth,
+  useAutoRefresh,
   useConnectionStatus,
   useGlucoseData,
+  useGlucoseTargets,
+  useInitialFetch,
   useKeyboardShortcuts,
   usePreferences,
+  useExtensionIcon,
 } from '@/hooks';
 import { useLogbookData } from '@/hooks/useLogbookData';
 import { useSensorExpiry } from '@/hooks/useSensorExpiry';
-import { parseLibreTimestamp } from '@/types/api';
 import './App.css';
 
 /**
  * Main App component
- * Handles authentication state and renders appropriate UI
+ * Orchestrates authentication state and UI composition
+ * Business logic is delegated to custom hooks and child components
  */
 function App() {
+  // Authentication
   const { isAuthenticated, isAuthLoaded, login, logout } = useAuth();
-  const { data, isLoading: isDataLoading, error, lastFetchTime, fetchData } = useGlucoseData();
-  const { data: logbookData, isLoading: isLogbookLoading } = useLogbookData();
+
+  // Data fetching
+  const { data, graphData, isLoading: isDataLoading, error, lastFetchTime, fetchData } = useGlucoseData();
+  const { logbookGraphData, isLoading: isLogbookLoading } = useLogbookData();
+
+  // Derived data from hooks
+  const { targetLow, targetHigh, targetLowRaw, targetHighRaw, uom } = useGlucoseTargets(data?.data);
   const { daysToExpire, sensorStatus } = useSensorExpiry(data?.data?.activeSensors?.[0]);
   const { preferences, savePreferences, isLoading: isPrefsLoading } = usePreferences();
   const { status: connectionStatus } = useConnectionStatus(
     preferences.refreshInterval,
     lastFetchTime
   );
+
+  // UI state
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
+  // Event handlers
   const handleLoginSuccess = useCallback(() => {
     fetchData();
   }, [fetchData]);
@@ -42,105 +57,6 @@ function App() {
   const handleRefresh = useCallback(() => {
     fetchData();
   }, [fetchData]);
-
-  // Update extension icon when fresh data is loaded
-  useEffect(() => {
-    if (!data?.data?.connection?.glucoseItem) return;
-
-    const glucoseItem = data.data.connection.glucoseItem;
-    const colorMap: Record<number, string> = { 1: 'green', 2: 'yellow', 3: 'orange', 4: 'red' };
-    const arrowMap: Record<number, string> = { 1: 'down', 2: 'right-down', 3: 'right', 4: 'right-up', 5: 'up' };
-    
-    const color = colorMap[glucoseItem.MeasurementColor];
-    const arrow = arrowMap[glucoseItem.TrendArrow];
-
-    if (color && arrow) {
-      chrome.runtime.sendMessage({
-        action: 'UpdateIcon',
-        color,
-        arrow,
-      });
-    }
-  }, [data?.data?.connection?.glucoseItem]);
-
-  useEffect(() => {
-    if (isAuthenticated && !data) {
-      fetchData();
-    }
-  }, [isAuthenticated, data, fetchData]);
-
-  // Auto-refresh based on user preferences
-  useEffect(() => {
-    if (!isAuthenticated || !data) return;
-
-    const interval = setInterval(
-      () => {
-        fetchData();
-      },
-      preferences.refreshInterval * 60 * 1000
-    );
-
-    return () => clearInterval(interval);
-  }, [isAuthenticated, data, fetchData, preferences.refreshInterval]);
-
-  // Memoize graph data transformation to avoid recalculation on every render
-  const graphData = useMemo(() => {
-    if (!data?.data.graphData) return [];
-    return data.data.graphData.map((item) => ({
-      time: parseLibreTimestamp(item.Timestamp),
-      value: item.Value,
-    }));
-  }, [data?.data.graphData]);
-
-  // Memoize logbook graph data transformation
-  const logbookGraphData = useMemo(() => {
-    if (!logbookData?.data) return [];
-    return logbookData.data.map((item) => ({
-      time: parseLibreTimestamp(item.Timestamp),
-      value: item.Value,
-    }));
-  }, [logbookData?.data]);
-
-  // Memoize target values from API (already in user's preferred unit)
-  const targetLowRaw = useMemo(() => {
-    return data?.data.connection.targetLow ?? undefined;
-  }, [data?.data.connection.targetLow]);
-
-  const targetHighRaw = useMemo(() => {
-    return data?.data.connection.targetHigh ?? undefined;
-  }, [data?.data.connection.targetHigh]);
-
-  // Get unit of measure from connection (0 = mg/dL, 1 = mmol/L)
-  const uom = useMemo(() => {
-    return data?.data.connection.uom ?? 1;
-  }, [data?.data.connection.uom]);
-
-  // Convert targets to mmol/L for graph display (graph y-axis is 0-21 mmol/L)
-  const targetLow = useMemo(() => {
-    if (targetLowRaw === undefined) return undefined;
-    // uom: 0 = mg/dL, 1 = mmol/L
-    const isMgDl = uom === 0;
-    return isMgDl ? targetLowRaw / SENSOR_CONFIG.MMOL_TO_MGDL_FACTOR : targetLowRaw;
-  }, [targetLowRaw, uom]);
-
-  const targetHigh = useMemo(() => {
-    if (targetHighRaw === undefined) return undefined;
-    // uom: 0 = mg/dL, 1 = mmol/L
-    const isMgDl = uom === 0;
-    return isMgDl ? targetHighRaw / SENSOR_CONFIG.MMOL_TO_MGDL_FACTOR : targetHighRaw;
-  }, [targetHighRaw, uom]);
-
-  // Memoize glucose value
-  const glucoseValue = useMemo(
-    () => data?.data.connection.glucoseItem.Value,
-    [data?.data.connection.glucoseItem.Value]
-  );
-
-  // Memoize trend arrow from API
-  const currentTrendArrow = useMemo(
-    () => data?.data.connection.glucoseItem.TrendArrow,
-    [data?.data.connection.glucoseItem.TrendArrow]
-  );
 
   const handleOpenSettings = useCallback(() => {
     setIsSettingsOpen(true);
@@ -157,7 +73,6 @@ function App() {
     [savePreferences]
   );
 
-  // Test notification handler - sends to background script for system notification
   const handleTestNotification = useCallback((type: 'low' | 'high') => {
     const testValues = {
       low: { value: 3.5, threshold: 4.0 },
@@ -186,7 +101,19 @@ function App() {
     );
   }, []);
 
-  // Keyboard shortcuts for accessibility
+  // Side effects via hooks
+  useExtensionIcon(data?.data.connection.glucoseItem);
+  useInitialFetch({
+    isAuthenticated,
+    hasData: !!data,
+    onFetch: fetchData,
+  });
+  useAutoRefresh({
+    isEnabled: isAuthenticated,
+    hasData: !!data,
+    refreshInterval: preferences.refreshInterval,
+    onRefresh: fetchData,
+  });
   useKeyboardShortcuts({
     onRefresh: handleRefresh,
     onOpenSettings: handleOpenSettings,
@@ -197,6 +124,7 @@ function App() {
     isAuthenticated,
   });
 
+  // Loading states
   if (!isAuthLoaded || isPrefsLoading) {
     return (
       <div className="App">
@@ -216,6 +144,10 @@ function App() {
       </div>
     );
   }
+
+  // Extract data for display
+  const glucoseValue = data?.data.connection.glucoseItem.Value;
+  const currentTrendArrow = data?.data.connection.glucoseItem.TrendArrow;
 
   return (
     <div className="App" style={{ width: `${UI_CONFIG.POPUP_WIDTH}px` }}>
@@ -237,7 +169,7 @@ function App() {
             lastSuccessfulFetch={lastFetchTime}
           />
 
-          {/* Header with glucose display and action buttons on same line */}
+          {/* Header with glucose display and action buttons */}
           <div
             style={{
               width: '100%',
@@ -254,53 +186,24 @@ function App() {
               graphData={graphData}
               currentTrendArrow={currentTrendArrow}
             />
-            <div style={{ display: 'flex', gap: '8px' }} role="group" aria-label="Actions">
-              <button
-                type="button"
-                onClick={handleRefresh}
-                className="action-button"
-                aria-label="Refresh glucose data (Ctrl+R)"
-                title="Refresh (Ctrl+R)"
-                disabled={isDataLoading}
-              >
-                🔄
-              </button>
-              <button
-                type="button"
-                onClick={handleOpenSettings}
-                className="action-button"
-                aria-label="Open settings (Ctrl+S)"
-                title="Settings (Ctrl+S)"
-              >
-                ⚙️
-              </button>
-              <button
-                type="button"
-                onClick={logout}
-                className="action-button"
-                aria-label="Log out of account (Ctrl+L)"
-                title="Log out (Ctrl+L)"
-              >
-                ↗️
-              </button>
-            </div>
+            <HeaderActions
+              onRefresh={handleRefresh}
+              onOpenSettings={handleOpenSettings}
+              onLogout={logout}
+              isRefreshing={isDataLoading}
+            />
           </div>
 
+          {/* Error message with retry */}
           {error && (
-            <div className="error-message" role="alert" aria-live="assertive" aria-atomic="true">
-              {error}
-              <button
-                type="button"
-                onClick={handleRefresh}
-                className="retry-button"
-                aria-label="Retry loading glucose data"
-                disabled={isDataLoading}
-              >
-                Retry
-              </button>
-            </div>
+            <ErrorMessage
+              error={error}
+              onRetry={handleRefresh}
+              isRetrying={isDataLoading}
+            />
           )}
 
+          {/* Glucose graph with target range */}
           <DevelopmentGraph
             graphData={graphData}
             targetLow={targetLow}
@@ -308,11 +211,12 @@ function App() {
             isLoading={isDataLoading}
           />
 
+          {/* Statistics panel with TIR, average, min, max */}
           <StatisticsPanel
             graphData={graphData}
             logbookData={logbookGraphData}
-            targetLow={targetLow}
-            targetHigh={targetHigh}
+            targetLow={targetLowRaw}
+            targetHigh={targetHighRaw}
             uom={uom}
             isLoading={isDataLoading || isLogbookLoading}
           />

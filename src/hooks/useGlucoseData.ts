@@ -1,13 +1,20 @@
-import { useCallback, useState } from 'react';
-import type { LibreViewResponse } from '@/types/api';
+import { useCallback, useState, useMemo } from 'react';
+import type { LibreViewResponse, GraphDataPoint } from '@/types/api';
+import { parseLibreTimestamp } from '@/types/api';
+
+export interface TransformedGraphDataPoint {
+  time: Date;
+  value: number;
+}
 
 interface GlucoseDataMessage {
   data?: LibreViewResponse['data'];
   error?: string;
 }
 
-interface UseGlucoseDataReturn {
+export interface UseGlucoseDataReturn {
   data: LibreViewResponse | null;
+  graphData: TransformedGraphDataPoint[];
   isLoading: boolean;
   error: string | null;
   lastFetchTime: Date | null;
@@ -19,6 +26,7 @@ interface UseGlucoseDataReturn {
  * Hook for fetching glucose data from LibreLinkUp API
  * Communicates with background script for API calls
  * Tracks last successful fetch time for data freshness monitoring
+ * Transforms raw API data into graph-ready format
  */
 export function useGlucoseData(): UseGlucoseDataReturn {
   const [data, setData] = useState<LibreViewResponse | null>(null);
@@ -67,8 +75,18 @@ export function useGlucoseData(): UseGlucoseDataReturn {
     setError(null);
   }, []);
 
+  // Transform raw API data to graph-ready format
+  const graphData: TransformedGraphDataPoint[] = useMemo(() => {
+    if (!data?.data.graphData) return [];
+    return data.data.graphData.map((item) => ({
+      time: parseLibreTimestamp(item.Timestamp),
+      value: item.Value,
+    }));
+  }, [data?.data.graphData]);
+
   return {
     data,
+    graphData,
     isLoading,
     error,
     lastFetchTime,

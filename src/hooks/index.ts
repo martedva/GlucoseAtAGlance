@@ -1,6 +1,10 @@
 export { useConnectionStatus } from './useConnectionStatus';
 export { useGlucoseData } from './useGlucoseData';
+export { useGlucoseTargets } from './useGlucoseTargets';
 export { usePreferences } from './usePreferences';
 export { useSensorExpiry } from './useSensorExpiry';
 export { useAuth, useStorage } from './useStorage';
 export { useKeyboardShortcuts } from './useKeyboardShortcuts';
+export { useExtensionIcon } from './useExtensionIcon';
+export { useAutoRefresh } from './useAutoRefresh';
+export { useInitialFetch } from './useInitialFetch';

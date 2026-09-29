@@ -8,11 +8,11 @@ interface GraphDataPoint {
 }
 
 interface StatisticsPanelProps {
-  graphData: GraphDataPoint[];      // 12-hour data from graph endpoint
-  logbookData: GraphDataPoint[];    // 14-day data from logbook endpoint
-  targetLow?: number;               // in user's preferred unit
-  targetHigh?: number;              // in user's preferred unit
-  uom?: number;                     // 1 = mmol/L, 2 = mg/dL
+  graphData: GraphDataPoint[];      // 12-hour data from graph endpoint (in user's preferred unit)
+  logbookData: GraphDataPoint[];    // 14-day data from logbook endpoint (in user's preferred unit)
+  targetLow?: number;               // Low target (in user's preferred unit)
+  targetHigh?: number;              // High target (in user's preferred unit)
+  uom?: number;                     // 0 = mg/dL, 1 = mmol/L
   isLoading?: boolean;
 }
 

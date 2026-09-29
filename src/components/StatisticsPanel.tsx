@@ -27,25 +27,25 @@ interface StatCardProps {
 const StatCard = ({ label, value, unit, subtext }: StatCardProps) => (
   <div
     style={{
-      flex: 1,
       padding: '12px',
       border: '1px solid #e0e0e0',
       borderRadius: '8px',
       backgroundColor: '#ffffff',
-      minWidth: '120px',
+      minWidth: 0,
+      boxSizing: 'border-box',
     }}
     role="article"
     aria-label={`${label}: ${value}${unit || ''}`}
   >
-    <div style={{ fontSize: '11px', color: '#666', textTransform: 'uppercase', marginBottom: '4px' }}>
+    <div style={{ fontSize: '11px', color: '#666', textTransform: 'uppercase', marginBottom: '4px', whiteSpace: 'nowrap' }}>
       {label}
     </div>
-    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#000' }}>
+    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#000', wordBreak: 'break-word' }}>
       {value}
       {unit && <span style={{ fontSize: '14px', color: '#666', marginLeft: '2px' }}>{unit}</span>}
     </div>
     {subtext && (
-      <div style={{ fontSize: '11px', color: '#999', marginTop: '4px' }}>{subtext}</div>
+      <div style={{ fontSize: '11px', color: '#999', marginTop: '4px', whiteSpace: 'nowrap' }}>{subtext}</div>
     )}
   </div>
 );
@@ -108,7 +108,7 @@ const StatisticsPanel = ({
 
   if (isLoading) {
     return (
-      <div style={{ marginTop: '16px', width: '100%' }} role="status" aria-label="Loading statistics">
+      <div style={{ marginTop: '16px', width: '100%', boxSizing: 'border-box' }} role="status" aria-label="Loading statistics">
         <div
           style={{
             display: 'flex',
@@ -127,6 +127,7 @@ const StatisticsPanel = ({
                 borderRadius: '4px',
                 minWidth: '80px',
                 height: '32px',
+                boxSizing: 'border-box',
               }}
               aria-hidden="true"
             />
@@ -135,8 +136,10 @@ const StatisticsPanel = ({
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
+            gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
             gap: '12px',
+            width: '100%',
+            boxSizing: 'border-box',
           }}
         >
           {[1, 2, 3, 4].map((i) => (
@@ -147,6 +150,7 @@ const StatisticsPanel = ({
                 backgroundColor: '#f0f0f0',
                 borderRadius: '8px',
                 height: '80px',
+                boxSizing: 'border-box',
               }}
               aria-hidden="true"
             />
@@ -157,7 +161,7 @@ const StatisticsPanel = ({
   }
 
   return (
-    <div style={{ marginTop: '16px', width: '100%' }} role="region" aria-label="Glucose statistics">
+    <div style={{ marginTop: '16px', width: '100%', boxSizing: 'border-box' }} role="region" aria-label="Glucose statistics">
       {/* Tab Navigation */}
       <div
         style={{
@@ -186,6 +190,8 @@ const StatisticsPanel = ({
               fontSize: '13px',
               fontWeight: activeTab === tab.id ? '600' : '400',
               opacity: tab.available ? 1 : 0.5,
+              whiteSpace: 'nowrap',
+              boxSizing: 'border-box',
             }}
             role="tab"
             aria-selected={activeTab === tab.id}
@@ -201,8 +207,10 @@ const StatisticsPanel = ({
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
+            gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
             gap: '12px',
+            width: '100%',
+            boxSizing: 'border-box',
           }}
           role="tabpanel"
           aria-label={`${activeStats.periodLabel} statistics`}

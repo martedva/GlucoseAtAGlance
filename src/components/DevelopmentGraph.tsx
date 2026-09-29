@@ -98,11 +98,15 @@ const DevelopmentGraph = memo(function DevelopmentGraph({
     }
 
     // Add target range rectangle if targets are defined
+    // Extend rectangle to include prediction period (15 minutes beyond last data point)
     if (targetLow !== undefined && targetHigh !== undefined) {
+      const lastDataPoint = graphData[graphData.length - 1];
+      const predictionEndTime = new Date(lastDataPoint.time.getTime() + 15 * 60 * 1000);
+      
       marks.push(
         Plot.rect([{}], {
           x1: graphData[0].time,
-          x2: graphData[graphData.length - 1].time,
+          x2: predictionEndTime,
           y1: targetLow,
           y2: targetHigh,
           fill: '#88ba82',

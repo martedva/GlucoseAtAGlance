@@ -1,12 +1,10 @@
-import { SENSOR_CONFIG } from '@/config';
-
 export interface GlucoseStats {
   timeInRange: number;        // Percentage (0-100)
   timeBelowRange: number;     // Percentage (0-100)
   timeAboveRange: number;     // Percentage (0-100)
-  averageGlucose: number;     // mmol/L
-  minGlucose: number;         // mmol/L
-  maxGlucose: number;         // mmol/L
+  averageGlucose: number;     // User's preferred unit
+  minGlucose: number;         // User's preferred unit
+  maxGlucose: number;         // User's preferred unit
   readingsCount: number;      // Number of data points
   standardDeviation: number;  // Variability
   periodLabel: string;        // e.g., "Last 12 Hours"
@@ -41,21 +39,26 @@ function calculateStandardDeviation(values: number[]): number {
 
 /**
  * Calculate glucose statistics for a given dataset
+ * @param data - Glucose data points (values in user's preferred unit)
+ * @param targetLow - Low target threshold (in user's preferred unit)
+ * @param targetHigh - High target threshold (in user's preferred unit)
+ * @param periodLabel - Label for the time period
+ * @param uom - Unit of measure: 0 = mg/dL, 1 = mmol/L
  */
 export function calculateGlucoseStats(
   data: DataPoint[],
-  targetLowMgDl: number,
-  targetHighMgDl: number,
-  periodLabel: string
+  targetLow: number,
+  targetHigh: number,
+  periodLabel: string,
+  uom: number = 1
 ): GlucoseStats | null {
   if (!data || data.length < 3) {
     return null;
   }
 
-  // Convert targets from mg/dL to mmol/L using fixed constant
-  const targetLow = targetLowMgDl / SENSOR_CONFIG.MMOL_TO_MGDL_FACTOR;
-  const targetHigh = targetHighMgDl / SENSOR_CONFIG.MMOL_TO_MGDL_FACTOR;
-
+  // uom: 0 = mg/dL, 1 = mmol/L
+  // Targets and data are both already in the user's preferred unit
+  // No conversion needed - just compare directly
   const values = data.map((d) => d.value);
   const readingsCount = values.length;
 
@@ -69,10 +72,20 @@ export function calculateGlucoseStats(
   // Calculate standard deviation
   const standardDeviation = calculateStandardDeviation(values);
 
-  // Calculate time in range percentages
-  const inRange = values.filter((v) => v >= targetLow && v <= targetHigh).length;
-  const below = values.filter((v) => v < targetLow).length;
-  const above = values.filter((v) => v > targetHigh).length;
+  // Calculate time in range percentages in a single pass
+  const { inRange, below, above } = values.reduce(
+    (acc, v) => {
+      if (v >= targetLow && v <= targetHigh) {
+        acc.inRange++;
+      } else if (v < targetLow) {
+        acc.below++;
+      } else {
+        acc.above++;
+      }
+      return acc;
+    },
+    { inRange: 0, below: 0, above: 0 }
+  );
 
   const timeInRange = (inRange / readingsCount) * 100;
   const timeBelowRange = (below / readingsCount) * 100;

@@ -14,15 +14,16 @@ describe('glucose-stats', () => {
     it('returns null for insufficient data', () => {
       const result = calculateGlucoseStats(
         [{ time: new Date(), value: 7.0 }],
-        70,
-        180,
-        'Test'
+        4.0,
+        10.0,
+        'Test',
+        1 // mmol/L
       );
       expect(result).toBeNull();
     });
 
     it('returns null for empty data', () => {
-      const result = calculateGlucoseStats([], 70, 180, 'Test');
+      const result = calculateGlucoseStats([], 4.0, 10.0, 'Test', 1);
       expect(result).toBeNull();
     });
 
@@ -32,59 +33,76 @@ describe('glucose-stats', () => {
           { time: new Date(), value: 7.0 },
           { time: new Date(), value: 8.0 },
         ],
-        70,
-        180,
-        'Test'
+        4.0,
+        10.0,
+        'Test',
+        1 // mmol/L
       );
       expect(result).toBeNull();
     });
 
     it('calculates correct average', () => {
-      const result = calculateGlucoseStats(mockData, 70, 180, 'Test');
+      const result = calculateGlucoseStats(mockData, 4.0, 10.0, 'Test', 1);
       expect(result).not.toBeNull();
       // Average: (6.0 + 7.5 + 8.2 + 5.5 + 12.0) / 5 = 7.84
       expect(result?.averageGlucose).toBeCloseTo(7.84, 2);
     });
 
-    it('calculates time in range correctly', () => {
-      const result = calculateGlucoseStats(mockData, 70, 180, 'Test');
+    it('calculates time in range correctly (mmol/L)', () => {
+      const result = calculateGlucoseStats(mockData, 4.0, 10.0, 'Test', 1);
       expect(result).not.toBeNull();
-      // Target range: 70-180 mg/dL = 3.88-9.99 mmol/L
+      // Target range: 4.0-10.0 mmol/L
       // In range: 6.0, 7.5, 8.2, 5.5 (4 out of 5)
       // Out of range: 12.0 (1 out of 5)
       expect(result?.timeInRange).toBe(80);
     });
 
+    it('calculates time in range correctly (mg/dL)', () => {
+      const mgDlData = [
+        { time: new Date(Date.now() - 1000 * 60 * 15), value: 108 },
+        { time: new Date(Date.now() - 1000 * 60 * 30), value: 135 },
+        { time: new Date(Date.now() - 1000 * 60 * 45), value: 148 },
+        { time: new Date(Date.now() - 1000 * 60 * 60), value: 99 },
+        { time: new Date(Date.now() - 1000 * 60 * 75), value: 216 },
+      ];
+      const result = calculateGlucoseStats(mgDlData, 70, 180, 'Test', 0);
+      expect(result).not.toBeNull();
+      // Target range: 70-180 mg/dL
+      // In range: 108, 135, 148, 99 (4 out of 5)
+      // Out of range: 216 (1 out of 5)
+      expect(result?.timeInRange).toBe(80);
+    });
+
     it('calculates min and max correctly', () => {
-      const result = calculateGlucoseStats(mockData, 70, 180, 'Test');
+      const result = calculateGlucoseStats(mockData, 4.0, 10.0, 'Test', 1);
       expect(result).not.toBeNull();
       expect(result?.minGlucose).toBe(5.5);
       expect(result?.maxGlucose).toBe(12.0);
     });
 
     it('calculates standard deviation', () => {
-      const result = calculateGlucoseStats(mockData, 70, 180, 'Test');
+      const result = calculateGlucoseStats(mockData, 4.0, 10.0, 'Test', 1);
       expect(result).not.toBeNull();
       expect(result?.standardDeviation).toBeGreaterThan(0);
     });
 
     it('includes period label', () => {
-      const result = calculateGlucoseStats(mockData, 70, 180, 'Last 12 Hours');
+      const result = calculateGlucoseStats(mockData, 4.0, 10.0, 'Last 12 Hours', 1);
       expect(result).not.toBeNull();
       expect(result?.periodLabel).toBe('Last 12 Hours');
     });
 
     it('calculates time below range', () => {
-      const result = calculateGlucoseStats(mockData, 70, 180, 'Test');
+      const result = calculateGlucoseStats(mockData, 4.0, 10.0, 'Test', 1);
       expect(result).not.toBeNull();
-      // All readings are above 3.88 mmol/L (70 mg/dL), so 0% below
+      // All readings are above 4.0 mmol/L, so 0% below
       expect(result?.timeBelowRange).toBe(0);
     });
 
     it('calculates time above range', () => {
-      const result = calculateGlucoseStats(mockData, 70, 180, 'Test');
+      const result = calculateGlucoseStats(mockData, 4.0, 10.0, 'Test', 1);
       expect(result).not.toBeNull();
-      // 12.0 is above 9.99 mmol/L (180 mg/dL), so 20% above
+      // 12.0 is above 10.0 mmol/L, so 20% above
       expect(result?.timeAboveRange).toBe(20);
     });
   });

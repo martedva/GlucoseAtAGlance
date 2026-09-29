@@ -10,8 +10,9 @@ interface GraphDataPoint {
 interface StatisticsPanelProps {
   graphData: GraphDataPoint[];      // 12-hour data from graph endpoint
   logbookData: GraphDataPoint[];    // 14-day data from logbook endpoint
-  targetLow?: number;               // mg/dL
-  targetHigh?: number;              // mg/dL
+  targetLow?: number;               // in user's preferred unit
+  targetHigh?: number;              // in user's preferred unit
+  uom?: number;                     // 1 = mmol/L, 2 = mg/dL
   isLoading?: boolean;
 }
 
@@ -55,6 +56,7 @@ const StatisticsPanel = ({
   logbookData,
   targetLow = 70,
   targetHigh = 180,
+  uom = 1,
   isLoading = false,
 }: StatisticsPanelProps) => {
   const [activeTab, setActiveTab] = useState<TabType>('12h');
@@ -62,22 +64,22 @@ const StatisticsPanel = ({
   // Calculate stats for each period
   const stats12h = useMemo(() => {
     if (!graphData || graphData.length < 3) return null;
-    return calculateGlucoseStats(graphData, targetLow, targetHigh, 'Last 12 Hours');
-  }, [graphData, targetLow, targetHigh]);
+    return calculateGlucoseStats(graphData, targetLow, targetHigh, 'Last 12 Hours', uom);
+  }, [graphData, targetLow, targetHigh, uom]);
 
   const stats7d = useMemo(() => {
     if (!logbookData || logbookData.length < 3) return null;
     const filtered = filterDataByPeriod(logbookData, 7 * 24);
     if (filtered.length < 3) return null;
-    return calculateGlucoseStats(filtered, targetLow, targetHigh, 'Last 7 Days');
-  }, [logbookData, targetLow, targetHigh]);
+    return calculateGlucoseStats(filtered, targetLow, targetHigh, 'Last 7 Days', uom);
+  }, [logbookData, targetLow, targetHigh, uom]);
 
   const stats14d = useMemo(() => {
     if (!logbookData || logbookData.length < 3) return null;
     const filtered = filterDataByPeriod(logbookData, 14 * 24);
     if (filtered.length < 3) return null;
-    return calculateGlucoseStats(filtered, targetLow, targetHigh, 'Last 14 Days');
-  }, [logbookData, targetLow, targetHigh]);
+    return calculateGlucoseStats(filtered, targetLow, targetHigh, 'Last 14 Days', uom);
+  }, [logbookData, targetLow, targetHigh, uom]);
 
   // Get active stats based on selected tab
   const activeStats: GlucoseStats | null = useMemo(() => {

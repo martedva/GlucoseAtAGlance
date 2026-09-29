@@ -101,18 +101,34 @@ function App() {
     }));
   }, [logbookData?.data]);
 
-  // Memoize target values from API
-  const targetLow = useMemo(() => {
-    return data?.data.connection.targetLow
-      ? data.data.connection.targetLow / SENSOR_CONFIG.MMOL_TO_MGDL_FACTOR
-      : undefined;
+  // Memoize target values from API (already in user's preferred unit)
+  const targetLowRaw = useMemo(() => {
+    return data?.data.connection.targetLow ?? undefined;
   }, [data?.data.connection.targetLow]);
 
-  const targetHigh = useMemo(() => {
-    return data?.data.connection.targetHigh
-      ? data.data.connection.targetHigh / SENSOR_CONFIG.MMOL_TO_MGDL_FACTOR
-      : undefined;
+  const targetHighRaw = useMemo(() => {
+    return data?.data.connection.targetHigh ?? undefined;
   }, [data?.data.connection.targetHigh]);
+
+  // Get unit of measure from connection (0 = mg/dL, 1 = mmol/L)
+  const uom = useMemo(() => {
+    return data?.data.connection.uom ?? 1;
+  }, [data?.data.connection.uom]);
+
+  // Convert targets to mmol/L for graph display (graph y-axis is 0-21 mmol/L)
+  const targetLow = useMemo(() => {
+    if (targetLowRaw === undefined) return undefined;
+    // uom: 0 = mg/dL, 1 = mmol/L
+    const isMgDl = uom === 0;
+    return isMgDl ? targetLowRaw / SENSOR_CONFIG.MMOL_TO_MGDL_FACTOR : targetLowRaw;
+  }, [targetLowRaw, uom]);
+
+  const targetHigh = useMemo(() => {
+    if (targetHighRaw === undefined) return undefined;
+    // uom: 0 = mg/dL, 1 = mmol/L
+    const isMgDl = uom === 0;
+    return isMgDl ? targetHighRaw / SENSOR_CONFIG.MMOL_TO_MGDL_FACTOR : targetHighRaw;
+  }, [targetHighRaw, uom]);
 
   // Memoize glucose value
   const glucoseValue = useMemo(
@@ -297,6 +313,7 @@ function App() {
             logbookData={logbookGraphData}
             targetLow={targetLow}
             targetHigh={targetHigh}
+            uom={uom}
             isLoading={isDataLoading || isLogbookLoading}
           />
 

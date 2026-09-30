@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
+import './ErrorBoundary.css';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -83,58 +84,19 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       const friendlyMessage = getUserFriendlyMessage(this.state.error?.message || '');
 
       return (
-        <div
-          role="alert"
-          style={{
-            padding: '20px',
-            textAlign: 'center',
-            color: '#d32f2f',
-            backgroundColor: '#ffebee',
-            borderRadius: '8px',
-            margin: '20px',
-            border: '1px solid #ef9a9a',
-          }}
-        >
-          <h2 style={{ margin: '0 0 10px 0', fontSize: '18px' }}>⚠️ Something went wrong</h2>
-          <p style={{ margin: '0 0 15px 0', fontSize: '14px', lineHeight: '1.5' }}>
-            {friendlyMessage}
-          </p>
+        <div className="error-boundary" role="alert">
+          <h2 className="error-boundary__title">⚠️ Something went wrong</h2>
+          <p className="error-boundary__message">{friendlyMessage}</p>
           {this.state.error?.message && (
-            <details style={{ marginBottom: '15px', textAlign: 'left' }}>
-              <summary style={{ cursor: 'pointer', fontSize: '12px', color: '#666' }}>
-                Technical details
-              </summary>
-              <code
-                style={{
-                  display: 'block',
-                  marginTop: '8px',
-                  padding: '8px',
-                  backgroundColor: '#f5f5f5',
-                  borderRadius: '4px',
-                  fontSize: '11px',
-                  wordBreak: 'break-all',
-                }}
-              >
-                {this.state.error.message}
-              </code>
+            <details className="error-boundary__details">
+              <summary className="error-boundary__summary">Technical details</summary>
+              <code className="error-boundary__code">{this.state.error.message}</code>
             </details>
           )}
           <button
             type="button"
             onClick={this.handleRetry}
-            style={{
-              padding: '10px 20px',
-              backgroundColor: '#d32f2f',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: '500',
-              transition: 'background-color 0.2s',
-            }}
-            onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#b71c1c')}
-            onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#d32f2f')}
+            className="error-boundary__retry-button"
           >
             🔄 Refresh Page
           </button>

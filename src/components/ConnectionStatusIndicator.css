@@ -1,0 +1,51 @@
+/* ConnectionStatusIndicator Component Styles */
+.connection-status-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  width: 100%;
+  margin-bottom: var(--spacing-3);
+}
+
+.connection-status-indicator__icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.connection-status-indicator__content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.connection-status-indicator__text {
+  font-weight: var(--font-weight-medium);
+}
+
+.connection-status-indicator__subtext {
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+/* Status Variants */
+.connection-status-indicator--offline {
+  background-color: var(--color-error-bg);
+  border: 1px solid var(--color-error-border);
+  color: var(--color-error-text);
+}
+
+.connection-status-indicator--stale {
+  background-color: var(--color-warning-bg);
+  border: 1px solid var(--color-warning-border);
+  color: var(--color-warning-text);
+}
+
+.connection-status-indicator--online {
+  background-color: var(--color-success-bg);
+  border: 1px solid var(--color-success-border);
+  color: var(--color-success-text);
+}

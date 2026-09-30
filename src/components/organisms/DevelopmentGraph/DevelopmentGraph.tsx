@@ -3,6 +3,7 @@ import { Chart, registerables } from 'chart.js';
 import 'chartjs-adapter-date-fns';
 import { LoadingSkeleton } from '@/components/atoms';
 import { DataCard } from '@/components/molecules';
+import { useTheme } from '@/hooks/useTheme';
 import { predictGlucoseTrend } from '@/utils/trend-prediction';
 import type { TransformedGraphDataPoint } from '@/hooks/useGlucoseData';
 import './DevelopmentGraph.css';
@@ -47,6 +48,7 @@ const DevelopmentGraph = memo(function DevelopmentGraph({
 }: DevelopmentGraphProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<Chart | null>(null);
+  const { theme } = useTheme();
 
   const unit = uom === 0 ? 'mmol/L' : 'mg/dL';
 
@@ -206,7 +208,7 @@ const DevelopmentGraph = memo(function DevelopmentGraph({
         chartRef.current = null;
       }
     };
-  }, [graphData, targetLow, targetHigh, unit]);
+  }, [graphData, targetLow, targetHigh, unit, theme]);
 
   if (isLoading) {
     return (

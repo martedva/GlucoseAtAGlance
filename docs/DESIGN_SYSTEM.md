@@ -378,12 +378,11 @@ All interactive elements must have visible focus indicators:
 ### Phase 2: Component Updates ✅ COMPLETE
 - [x] Update GlucoseDisplay (remove special background, use card style)
 - [x] Update StatisticsPanel (consistent card styling)
-- [x] Update DevelopmentGraph (wrap in DataCard, use CSS variables)
+- [x] Update DevelopmentGraph (wrap in DataCard)
 - [x] Update all StatCard instances (use `.card` composes)
 - [x] Update DataCard (use `.card` composes)
 - [x] Update Button (remove hardcoded colors)
 - [x] Update ErrorMessage (remove hardcoded colors)
-- [x] Update Chart.js colors to use CSS variables (dark mode support)
 
 ### Phase 3: State Management ✅ COMPLETE
 - [x] Install Zustand for state management
@@ -392,13 +391,13 @@ All interactive elements must have visible focus indicators:
 - [x] Add `isLoaded` state to prevent flash of wrong theme
 - [x] Update App.tsx to wait for theme initialization
 
-### Phase 3: Graph & Visualizations
+### Phase 4: Graph & Visualizations
 - [ ] Update Chart.js colors for dark mode support
 - [ ] Update target range colors
 - [ ] Update trend line colors
 - [ ] Ensure graph is readable in both themes
 
-### Phase 4: Polish & Testing
+### Phase 5: Polish & Testing
 - [ ] Test all components in light mode
 - [ ] Test all components in dark mode
 - [ ] Verify WCAG contrast ratios (automated + manual)

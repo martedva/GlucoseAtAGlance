@@ -37,7 +37,7 @@ function App() {
   const { isAuthenticated, isAuthLoaded, login, logout } = useAuth();
 
   // Theme management
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, isLoaded: isThemeLoaded } = useTheme();
 
   // Data fetching
   const { data, graphData, isLoading: isDataLoading, error, lastFetchTime, fetchData } = useGlucoseData();
@@ -141,7 +141,7 @@ function App() {
   });
 
   // Loading states
-  if (!isAuthLoaded || isPrefsLoading) {
+  if (!isAuthLoaded || isPrefsLoading || !isThemeLoaded) {
     return (
       <div className="App">
         <div className="loading-container">

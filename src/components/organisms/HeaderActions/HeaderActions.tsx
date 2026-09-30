@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { Button } from '@/components/atoms';
-import type { Theme } from '@/hooks/useTheme';
+import type { Theme } from '@/stores';
 import './HeaderActions.css';
 
 export interface HeaderActionsProps {

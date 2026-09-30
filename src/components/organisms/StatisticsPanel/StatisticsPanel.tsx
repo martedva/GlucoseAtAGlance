@@ -1,6 +1,5 @@
-import { memo, useState } from 'react';
-import { TabButton } from '@/components/molecules';
-import { StatCard } from '@/components/molecules';
+import { useState, useMemo } from 'react';
+import { StatCard, TabButton } from '@/components/molecules';
 import type { TransformedGraphDataPoint } from '@/hooks/useGlucoseData';
 import './StatisticsPanel.css';
 
@@ -29,8 +28,9 @@ interface Stats {
  * Organism StatisticsPanel component
  * Shows glucose statistics for different time periods
  */
-const StatisticsPanel = memo(function StatisticsPanel({
+const StatisticsPanel = function StatisticsPanel({
   graphData,
+  logbookData,
   targetLow = 70,
   targetHigh = 180,
   isLoading,
@@ -38,10 +38,49 @@ const StatisticsPanel = memo(function StatisticsPanel({
 }: StatisticsPanelProps) {
   const [period, setPeriod] = useState<StatisticsPeriod>('12h');
 
-  const stats = calculateStatistics(graphData, period, targetLow, targetHigh);
+  // Merge graphData and logbookData, removing duplicates by timestamp
+  const mergedData = useMemo(() => {
+    if (!graphData || graphData.length === 0) return logbookData || [];
+    if (!logbookData || logbookData.length === 0) return graphData;
+
+    // Combine both arrays and remove duplicates based on timestamp
+    const combined = [...graphData, ...logbookData];
+    const uniqueMap = new Map<number, TransformedGraphDataPoint>();
+    
+    combined.forEach((point) => {
+      const timestamp = point.time.getTime();
+      // Keep the first occurrence (or could keep latest if needed)
+      if (!uniqueMap.has(timestamp)) {
+        uniqueMap.set(timestamp, point);
+      }
+    });
+
+    // Convert back to array and sort by time
+    return Array.from(uniqueMap.values()).sort((a, b) => a.time.getTime() - b.time.getTime());
+  }, [graphData, logbookData]);
+
+  const stats = useMemo(
+    () => calculateStatistics(mergedData, period, targetLow, targetHigh),
+    [mergedData, period, targetLow, targetHigh]
+  );
   const unit = uom === 0 ? 'mmol/L' : 'mg/dL';
 
   const periods: StatisticsPeriod[] = ['12h', '7d', '14d'];
+
+  // Helper to format date with time (no seconds)
+  const formatDateTime = (date?: Date) => {
+    if (!date) return '';
+    return date.toLocaleDateString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const handlePeriodChange = (newPeriod: StatisticsPeriod) => {
+    setPeriod(newPeriod);
+  };
 
   if (isLoading) {
     return (
@@ -59,7 +98,7 @@ const StatisticsPanel = memo(function StatisticsPanel({
             <TabButton
               key={p}
               isActive={period === p}
-              onClick={() => setPeriod(p)}
+              onClick={() => handlePeriodChange(p)}
               role="tab"
               aria-selected={period === p}
             >
@@ -84,26 +123,22 @@ const StatisticsPanel = memo(function StatisticsPanel({
           label="Min"
           value={stats.min.toFixed(1)}
           unit={unit}
-          subtext={stats.minDate?.toLocaleDateString()}
+          subtext={formatDateTime(stats.minDate)}
         />
         <StatCard
           label="Max"
           value={stats.max.toFixed(1)}
           unit={unit}
-          subtext={stats.maxDate?.toLocaleDateString()}
+          subtext={formatDateTime(stats.maxDate)}
         />
-        <StatCard
-          label="TIR"
-          value={`${stats.tir.toFixed(0)}%`}
-          subtext="Time in Range"
-        />
+        <StatCard label="TIR" value={`${stats.tir.toFixed(0)}%`} subtext="Time in Range" />
       </div>
       <div className="statistics-panel__tabs" role="tablist">
         {periods.map((p) => (
           <TabButton
             key={p}
             isActive={period === p}
-            onClick={() => setPeriod(p)}
+            onClick={() => handlePeriodChange(p)}
             role="tab"
             aria-selected={period === p}
           >
@@ -113,7 +148,7 @@ const StatisticsPanel = memo(function StatisticsPanel({
       </div>
     </div>
   );
-});
+}
 
 function calculateStatistics(
   data: TransformedGraphDataPoint[],
@@ -128,7 +163,7 @@ function calculateStatistics(
   // Filter data by period
   const now = Date.now();
   const hours = period === '12h' ? 12 : period === '7d' ? 168 : 336;
-  const cutoffTime = now - (hours * 60 * 60 * 1000);
+  const cutoffTime = now - hours * 60 * 60 * 1000;
   const filteredData = data.filter((d) => d.time.getTime() > cutoffTime);
 
   if (filteredData.length === 0) {

@@ -3,18 +3,21 @@
 A Chrome extension for monitoring glucose levels from LibreLinkUp. View your continuous glucose monitoring (CGM) data at a glance with real-time updates, trend visualization, and customizable alerts.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
-![React](https://img.shields.io/badge/React-18.2-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)
+![React](https://img.shields.io/badge/React-18.3-blue)
+![Vite](https://img.shields.io/badge/Vite-6.0-purple)
 
 ## Features
 
 - 📊 **Real-time Glucose Monitoring**: View current glucose levels with trend arrows
 - 📈 **Interactive Graph**: Visualize glucose trends with 15-minute prediction overlay
 - 🔮 **Trend Prediction**: See where your glucose is heading (rising/falling/stable)
+- 📊 **Statistics Panel**: View Avg, Min, Max, SD, and Time in Range (TIR) for 12h/7d/14d periods
 - 🟢 **Data Freshness Indicator**: Know instantly if data is live, stale, or offline
 - ⚠️ **Smart Alerts**: Color-coded glucose levels (green/yellow/orange/red)
 - 📅 **Sensor Tracking**: Monitor sensor expiry with warning notifications
 - 💾 **Data Export**: Export your glucose data to CSV or JSON formats
+- 🌓 **Dark Mode**: Toggle between light and dark themes
 - ⚙️ **Customizable Settings**: Adjust refresh intervals and notification preferences
 - ♿ **Accessible**: WCAG compliant with full keyboard navigation and screen reader support
 - 🔒 **Secure**: Credentials stored locally, never sent to third parties
@@ -68,6 +71,7 @@ A Chrome extension for monitoring glucose levels from LibreLinkUp. View your con
   - Refresh interval (2/5/10/15 minutes)
   - Enable/disable browser notifications for high/low glucose alerts
   - Test notification buttons to preview alert appearance
+  - Toggle between light and dark themes
 - **Logout**: Click the logout button (↗️) or press `Ctrl+L` to sign out
 - **Data Freshness**: Check the status indicator at the top:
   - ✅ **Live data** (green) - Data is current
@@ -80,6 +84,12 @@ A Chrome extension for monitoring glucose levels from LibreLinkUp. View your con
   - ↓ Falling fast - Glucose is decreasing rapidly
   - ↘️ Falling - Glucose is decreasing
   - Dotted line on graph shows 15-minute prediction
+- **Statistics Panel**: View key metrics with adjustable time periods:
+  - **Avg**: Average glucose with standard deviation (SD)
+  - **Min**: Lowest glucose reading with timestamp
+  - **Max**: Highest glucose reading with timestamp
+  - **TIR**: Time in Range percentage (time within target range)
+  - Toggle between 12h, 7d, and 14d views
 - **Glucose Notifications**: Get browser notifications when glucose goes outside target range
   - Enable in Settings panel
   - Test alerts with "Test Low Alert" and "Test High Alert" buttons
@@ -119,25 +129,30 @@ GlucoseAtAGlance/
 
 ### Technology Stack
 
-- **Frontend**: React 18, TypeScript
-- **State Management**: React Hooks (useState, useReducer, useContext)
+- **Frontend**: React 18.3, TypeScript 5.7
+- **State Management**: Zustand (persisted state with chrome.storage)
 - **Data Fetching**: Custom hooks with SWR-like caching
-- **Visualization**: Observable Plot
-- **Styling**: CSS Modules
-- **Build Tool**: React App Rewired (custom Webpack config)
-- **Testing**: Jest, React Testing Library
-- **Linting**: Biome
+- **Visualization**: Chart.js with date-fns adapter
+- **Styling**: CSS Modules with design tokens
+- **Build Tool**: Vite 6 with CRXJS plugin
+- **Testing**: Vitest, React Testing Library
+- **Linting/Formatting**: Biome
+- **Fonts**: Inter (UI), JetBrains Mono (glucose values)
 
 ### Key Components
 
-- `App.tsx`: Main application component with authentication state
+- `App.tsx`: Main application component with authentication and theme state
 - `GlucoseDisplay.tsx`: Shows current glucose value, trend arrow, and predicted value
 - `DevelopmentGraph.tsx`: Interactive glucose trend graph with prediction overlay
+- `StatisticsPanel.tsx`: Statistics cards (Avg, Min, Max, TIR) with 12h/7d/14d periods
 - `ConnectionStatusIndicator.tsx`: Data freshness status (live/stale/offline)
 - `LoginForm.tsx`: User authentication
-- `SettingsPanel.tsx`: User preferences (refresh interval)
+- `SettingsPanel.tsx`: User preferences (refresh interval, notifications, theme)
 - `ErrorBoundary.tsx`: Graceful error handling with user-friendly messages
 - `useConnectionStatus.ts`: Hook for monitoring data freshness
+- `useGlucoseData.ts`: Hook for fetching and transforming glucose data
+- `useLogbookData.ts`: Hook for fetching historical logbook data
+- `useTheme.ts`: Hook for dark/light theme management with persistence
 - `trend-prediction.ts`: Linear regression algorithm for glucose forecasting
 
 ## Development
@@ -145,8 +160,8 @@ GlucoseAtAGlance/
 ### Available Scripts
 
 ```bash
-# Start development server
-npm start
+# Start development server (with hot reload)
+npm run dev
 
 # Build for production
 npm run build
@@ -172,9 +187,11 @@ npm run icons
 Create a `.env` file in the root directory for development:
 
 ```env
-REACT_APP_API_BASE_URL=https://api-eu.libreview.io
-REACT_APP_API_VERSION=4.16.0
+VITE_API_BASE_URL=https://api-eu.libreview.io
+VITE_API_VERSION=4.16.0
 ```
+
+**Note**: Vite requires environment variables to be prefixed with `VITE_` to be exposed to the client.
 
 ### Testing
 
@@ -287,9 +304,12 @@ This extension is not affiliated with or endorsed by Abbott Diabetes Care Ltd. L
 ## Acknowledgments
 
 - [LibreLinkUp](https://www.libreviewup.com/) for their API
-- [Observable Plot](https://observablehq.com/plot/) for data visualization
+- [Chart.js](https://www.chartjs.org/) for data visualization
+- [Vite](https://vitejs.dev/) for fast builds and development
 - [React](https://react.dev/) for the UI framework
+- [Zustand](https://zustand-demo.pmnd.rs/) for state management
 - [Biome](https://biomejs.dev/) for code quality tools
+- [Google Fonts](https://fonts.google.com/) - Inter and JetBrains Mono fonts
 
 ---
 

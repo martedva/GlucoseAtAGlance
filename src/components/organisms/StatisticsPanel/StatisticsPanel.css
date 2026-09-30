@@ -9,6 +9,8 @@
   gap: var(--spacing-1);
   margin-top: var(--spacing-2);
   justify-content: flex-end;
+  position: relative;
+  z-index: 1;
 }
 
 .statistics-panel__cards {

@@ -8,3 +8,5 @@ export { useKeyboardShortcuts } from './useKeyboardShortcuts';
 export { useExtensionIcon } from './useExtensionIcon';
 export { useAutoRefresh } from './useAutoRefresh';
 export { useInitialFetch } from './useInitialFetch';
+export { useTheme } from './useTheme';
+export type { Theme } from './useTheme';

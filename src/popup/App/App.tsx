@@ -20,6 +20,7 @@ import {
   useKeyboardShortcuts,
   usePreferences,
   useExtensionIcon,
+  useTheme,
 } from '@/hooks';
 import { useLogbookData } from '@/hooks/useLogbookData';
 import { useSensorExpiry } from '@/hooks/useSensorExpiry';
@@ -34,6 +35,9 @@ import '@/styles/global.css';
 function App() {
   // Authentication
   const { isAuthenticated, isAuthLoaded, login, logout } = useAuth();
+
+  // Theme management
+  const { theme, toggleTheme } = useTheme();
 
   // Data fetching
   const { data, graphData, isLoading: isDataLoading, error, lastFetchTime, fetchData } = useGlucoseData();
@@ -177,7 +181,9 @@ function App() {
             onRefresh={handleRefresh}
             onOpenSettings={handleOpenSettings}
             onLogout={logout}
+            onToggleTheme={toggleTheme}
             isRefreshing={isDataLoading}
+            theme={theme}
           />
         </GlucoseDisplay>
 

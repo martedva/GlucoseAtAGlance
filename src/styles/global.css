@@ -1,57 +1,66 @@
 /* ============================================
    Glucose At A Glance - Global Styles
+   Design System v1.0.0
    ============================================ */
 
-/* CSS Variables (Design Tokens) */
+/* CSS Variables (Design Tokens)
+   Light mode (default) */
 :root {
   /* Colors - Primary */
-  --color-primary: #2196f3;
-  --color-primary-dark: #1976d2;
-  --color-primary-light: #bbdefb;
+  --color-primary: #0066CC;
+  --color-primary-dark: #004C99;
+  --color-primary-light: #E6F0FF;
+  --color-primary-bold: #0052A3;
   
   /* Colors - Status */
-  --color-success: #4caf50;
-  --color-success-bg: #d1fae5;
-  --color-success-border: #a7f3d0;
-  --color-success-text: #047857;
+  --color-success: #059669;
+  --color-success-bg: #D1FAE5;
+  --color-success-border: #10B981;
+  --color-success-text: #065F46;
   
-  --color-warning: #ff9800;
-  --color-warning-bg: #fef3c7;
-  --color-warning-border: #fde68a;
-  --color-warning-text: #92400e;
+  --color-warning: #D97706;
+  --color-warning-bg: #FEF3C7;
+  --color-warning-border: #F59E0B;
+  --color-warning-text: #92400E;
   
-  --color-error: #f44336;
-  --color-error-bg: #fee2e2;
-  --color-error-border: #fecaca;
-  --color-error-text: #dc2626;
-  --color-error-dark: #b91c1c;
+  --color-error: #DC2626;
+  --color-error-bg: #FEE2E2;
+  --color-error-border: #EF4444;
+  --color-error-text: #B91C1C;
   
-  --color-info: #1976d2;
-  --color-info-bg: #e3f2fd;
-  --color-info-border: #90caf9;
-  --color-info-text: #1565c0;
+  --color-info: #0284C7;
+  --color-info-bg: #E0F2FE;
+  --color-info-border: #0EA5E9;
+  --color-info-text: #075985;
   
-  /* Colors - Neutrals */
-  --color-white: #ffffff;
-  --color-gray-50: #f9fafb;
-  --color-gray-100: #f5f5f5;
-  --color-gray-200: #e0e0e0;
-  --color-gray-300: #d1d5db;
-  --color-gray-400: #9ca3af;
-  --color-gray-500: #6b7280;
-  --color-gray-600: #4b5563;
-  --color-gray-700: #374151;
-  --color-gray-800: #1f2937;
-  --color-gray-900: #111827;
+  /* Colors - Neutrals (Warm Gray Scale) */
+  --color-white: #FFFFFF;
+  --color-gray-50: #F8F7F5;
+  --color-gray-100: #F1EFEB;
+  --color-gray-200: #E4E0D9;
+  --color-gray-300: #C9C4B8;
+  --color-gray-400: #9A9485;
+  --color-gray-500: #6B6559;
+  --color-gray-600: #4D4740;
+  --color-gray-700: #36322D;
+  --color-gray-800: #1F1D1A;
+  --color-gray-900: #0F0E0D;
   
   /* Colors - Glucose Trends */
-  --glucose-rising: #f57c00;
-  --glucose-falling: #1976d2;
-  --glucose-stable: #666666;
+  --glucose-rising: #EA580C;
+  --glucose-falling: #2563EB;
+  --glucose-stable: #475569;
+  --glucose-high: #DC2626;
+  --glucose-low: #7C3AED;
   
   /* Colors - Target Range */
-  --target-range-bg: #88ba82;
-  --target-range-bg-light: rgba(136, 186, 130, 0.3);
+  --target-range-bg: #10B981;
+  --target-range-bg-light: rgba(16, 185, 129, 0.15);
+  
+  /* Page & Card Backgrounds */
+  --color-page-bg: var(--color-gray-50);
+  --color-card-bg: var(--color-white);
+  --color-card-border: var(--color-gray-200);
   
   /* Typography */
   --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
@@ -94,6 +103,131 @@
   --transition-normal: 0.2s ease;
 }
 
+/* Dark Mode Overrides */
+[data-theme="dark"] {
+  /* Colors - Primary */
+  --color-primary: #4DA3FF;
+  --color-primary-dark: #66B3FF;
+  --color-primary-light: #003366;
+  --color-primary-bold: #80C1FF;
+  
+  /* Colors - Status */
+  --color-success: #34D399;
+  --color-success-bg: #064E3B;
+  --color-success-border: #10B981;
+  --color-success-text: #A7F3D0;
+  
+  --color-warning: #FBBF24;
+  --color-warning-bg: #78350F;
+  --color-warning-border: #F59E0B;
+  --color-warning-text: #FDE68A;
+  
+  --color-error: #F87171;
+  --color-error-bg: #7F1D1D;
+  --color-error-border: #EF4444;
+  --color-error-text: #FECACA;
+  
+  --color-info: #38BDF8;
+  --color-info-bg: #0C4A6E;
+  --color-info-border: #0EA5E9;
+  --color-info-text: #BAE6FD;
+  
+  /* Colors - Neutrals (Warm Gray Scale - Dark) */
+  --color-white: #0F172A;
+  --color-gray-50: #161E2E;
+  --color-gray-100: #1F293D;
+  --color-gray-200: #2D3850;
+  --color-gray-300: #3D4861;
+  --color-gray-400: #525D75;
+  --color-gray-500: #737D8C;
+  --color-gray-600: #949EAE;
+  --color-gray-700: #B4BBC6;
+  --color-gray-800: #D3D8DD;
+  --color-gray-900: #F0F2F5;
+  
+  /* Colors - Glucose Trends (Dark Mode) */
+  --glucose-rising: #FB923C;
+  --glucose-falling: #60A5FA;
+  --glucose-stable: #94A3B8;
+  --glucose-high: #F87171;
+  --glucose-low: #A78BFA;
+  
+  /* Colors - Target Range (Dark Mode) */
+  --target-range-bg: #34D399;
+  --target-range-bg-light: rgba(52, 211, 153, 0.10);
+  
+  /* Page & Card Backgrounds (Dark Mode) */
+  --color-page-bg: var(--color-gray-50);
+  --color-card-bg: var(--color-gray-100);
+  --color-card-border: var(--color-gray-300);
+  
+  /* Shadows (Dark Mode - softer) */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 20px rgba(77, 163, 255, 0.25);
+}
+
+/* System Preference Detection (if no user preference set) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-primary: #4DA3FF;
+    --color-primary-dark: #66B3FF;
+    --color-primary-light: #003366;
+    --color-primary-bold: #80C1FF;
+    
+    --color-success: #34D399;
+    --color-success-bg: #064E3B;
+    --color-success-border: #10B981;
+    --color-success-text: #A7F3D0;
+    
+    --color-warning: #FBBF24;
+    --color-warning-bg: #78350F;
+    --color-warning-border: #F59E0B;
+    --color-warning-text: #FDE68A;
+    
+    --color-error: #F87171;
+    --color-error-bg: #7F1D1D;
+    --color-error-border: #EF4444;
+    --color-error-text: #FECACA;
+    
+    --color-info: #38BDF8;
+    --color-info-bg: #0C4A6E;
+    --color-info-border: #0EA5E9;
+    --color-info-text: #BAE6FD;
+    
+    --color-white: #0F172A;
+    --color-gray-50: #161E2E;
+    --color-gray-100: #1F293D;
+    --color-gray-200: #2D3850;
+    --color-gray-300: #3D4861;
+    --color-gray-400: #525D75;
+    --color-gray-500: #737D8C;
+    --color-gray-600: #949EAE;
+    --color-gray-700: #B4BBC6;
+    --color-gray-800: #D3D8DD;
+    --color-gray-900: #F0F2F5;
+    
+    --glucose-rising: #FB923C;
+    --glucose-falling: #60A5FA;
+    --glucose-stable: #94A3B8;
+    --glucose-high: #F87171;
+    --glucose-low: #A78BFA;
+    
+    --target-range-bg: #34D399;
+    --target-range-bg-light: rgba(52, 211, 153, 0.10);
+    
+    --color-page-bg: var(--color-gray-50);
+    --color-card-bg: var(--color-gray-100);
+    --color-card-border: var(--color-gray-300);
+    
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+    --shadow-glow: 0 0 20px rgba(77, 163, 255, 0.25);
+  }
+}
+
 /* Reset and Base Styles */
 * {
   box-sizing: border-box;
@@ -107,9 +241,10 @@ body {
   font-size: var(--font-size-base);
   line-height: var(--line-height-normal);
   color: var(--color-gray-800);
-  background-color: var(--color-white);
+  background-color: var(--color-page-bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color var(--transition-normal), color var(--transition-normal);
 }
 
 /* App Container */
@@ -248,4 +383,60 @@ button:focus-visible {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-gray-400);
+}
+
+/* ============================================
+   Design System Utilities
+   ============================================ */
+
+/* Accent Borders */
+.accent-border {
+  border: 2px solid var(--color-primary-bold);
+}
+
+.accent-border--success {
+  border-color: var(--color-success-border);
+}
+
+.accent-border--warning {
+  border-color: var(--color-warning-border);
+}
+
+.accent-border--error {
+  border-color: var(--color-error-border);
+}
+
+.accent-border--info {
+  border-color: var(--color-info-border);
+}
+
+/* Card Base Styles */
+.card {
+  background-color: var(--color-card-bg);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-4);
+  transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.card:hover {
+  border-color: var(--color-gray-300);
+}
+
+/* Focus Glow for Primary Elements */
+.focus-glow:focus-visible {
+  outline: 2px solid var(--color-primary-bold);
+  outline-offset: 2px;
+  box-shadow: var(--shadow-glow);
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

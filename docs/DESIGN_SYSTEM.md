@@ -229,10 +229,41 @@ For emphasis (alerts, active states, focus):
 ### Implementation Strategy
 
 1. **CSS Custom Properties**: Define both light and dark values for all color tokens
-2. **Data Attribute Toggle**: Use `[data-theme="dark"]` on `<html>` or `<body>`
-3. **System Preference**: Default to `prefers-color-scheme` media query
-4. **User Preference**: Store in `chrome.storage` for persistence
+2. **Data Attribute Toggle**: Use `[data-theme="dark"]` on `<html>` element
+3. **System Preference**: Default to `prefers-color-scheme` media query on first load
+4. **User Preference**: Store in `chrome.storage.local` via Zustand store
 5. **Toggle Button**: Sun/Moon icon in HeaderActions component
+
+### Zustand Store Implementation
+
+Theme state is managed with Zustand for centralized state management:
+
+```typescript
+// src/stores/themeStore.ts
+export const useThemeStore = create<ThemeState>((set, get) => ({
+  theme: 'light',
+  isLoaded: false,
+  
+  loadFromStorage: async () => {
+    const storedTheme = await chrome.storage.local.get([THEME_STORAGE_KEY]);
+    set({
+      theme: storedTheme ?? getSystemPreference(),
+      isLoaded: true,
+    });
+  },
+  
+  setTheme: async (theme: Theme) => {
+    set({ theme });
+    await chrome.storage.local.set({ [THEME_STORAGE_KEY]: theme });
+  },
+  
+  toggleTheme: async () => {
+    const newTheme = get().theme === 'light' ? 'dark' : 'light';
+    set({ theme: newTheme });
+    await saveThemeToStorage(newTheme);
+  },
+}));
+```
 
 ### CSS Implementation
 
@@ -264,11 +295,29 @@ For emphasis (alerts, active states, focus):
 
 | State | Icon | Tooltip |
 |-------|------|---------|
-| Light Mode | ☀️ Sun (16px) | "Switch to dark mode" |
-| Dark Mode | 🌙 Moon (16px) | "Switch to light mode" |
+| Light Mode | 🌙 Moon | "Switch to dark mode" |
+| Dark Mode | ☀️ Sun | "Switch to light mode" |
 
-**Location:** HeaderActions component, right side  
-**Behavior:** Toggle on click, persist to storage
+**Location:** HeaderActions component, leftmost position  
+**Behavior:** Toggle on click, persist to `chrome.storage.local`
+
+### Usage in Components
+
+```tsx
+import { useTheme } from '@/hooks';
+
+function MyComponent() {
+  const { theme, toggleTheme, isLoaded } = useTheme();
+  
+  if (!isLoaded) return <Loading />;
+  
+  return (
+    <button onClick={toggleTheme}>
+      {theme === 'light' ? '🌙' : '☀️'}
+    </button>
+  );
+}
+```
 
 ---
 
@@ -336,6 +385,13 @@ All interactive elements must have visible focus indicators:
 - [x] Update ErrorMessage (remove hardcoded colors)
 - [x] Update Chart.js colors to use CSS variables (dark mode support)
 
+### Phase 3: State Management ✅ COMPLETE
+- [x] Install Zustand for state management
+- [x] Create `themeStore` with chrome.storage sync
+- [x] Update `useTheme` hook to use Zustand
+- [x] Add `isLoaded` state to prevent flash of wrong theme
+- [x] Update App.tsx to wait for theme initialization
+
 ### Phase 3: Graph & Visualizations
 - [ ] Update Chart.js colors for dark mode support
 - [ ] Update target range colors
@@ -364,6 +420,7 @@ All interactive elements must have visible focus indicators:
 | 2026-09-30 | 1.0.0 | Accent border colors confirmed | User |
 | 2026-09-30 | 1.0.1 | Phase 1 complete: Color tokens, dark mode, theme toggle | AI |
 | 2026-09-30 | 1.0.2 | Phase 2 complete: Component updates, Chart.js dark mode | AI |
+| 2026-09-30 | 1.0.3 | Phase 3 complete: Zustand store for theme state | AI |
 
 ---
 

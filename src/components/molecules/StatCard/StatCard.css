@@ -19,10 +19,12 @@
   align-items: baseline;
   justify-content: center;
   gap: var(--spacing-1);
+  font-family: var(--font-family-mono);
   font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
+  font-weight: 700;
   color: var(--color-gray-900);
   word-break: break-word;
+  font-variant-numeric: tabular-nums;
 }
 
 .stat-card__unit {

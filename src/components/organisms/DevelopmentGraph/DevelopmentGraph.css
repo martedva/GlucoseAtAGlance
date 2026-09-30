@@ -3,6 +3,13 @@
   width: 100%;
   box-sizing: border-box;
   overflow: hidden;
+  border: 2px solid var(--color-accent-border);
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition-fast);
+}
+
+.graph-container:hover {
+  border-color: var(--color-accent-border-hover);
 }
 
 .graph-container__canvas-wrapper {

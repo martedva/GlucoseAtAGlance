@@ -3,6 +3,13 @@
   padding: var(--spacing-2);
   min-width: 0;
   flex: 1;
+  border: 2px solid var(--color-accent-border);
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition-fast);
+}
+
+.stat-card:hover {
+  border-color: var(--color-accent-border-hover);
 }
 
 .stat-card__label {
@@ -22,7 +29,7 @@
   font-family: var(--font-family-mono);
   font-size: var(--font-size-xl);
   font-weight: 700;
-  color: var(--color-gray-900);
+  color: var(--color-accent);
   word-break: break-word;
   font-variant-numeric: tabular-nums;
 }

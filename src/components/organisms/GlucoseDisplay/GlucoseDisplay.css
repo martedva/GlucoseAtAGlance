@@ -76,7 +76,7 @@
   font-family: var(--font-family-mono);
   font-size: 40px;
   font-weight: 700;
-  color: var(--color-gray-900);
+  color: var(--color-accent);
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }

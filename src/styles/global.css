@@ -12,6 +12,13 @@
   --color-primary-light: #E6F0FF;
   --color-primary-bold: #0052A3;
   
+  /* Colors - Accent */
+  --color-accent: #06B6D4;
+  --color-accent-dark: #0891B2;
+  --color-accent-light: #CFF4FF;
+  --color-accent-border: #88A3A8;
+  --color-accent-border-hover: #6B8E9A;
+  
   /* Colors - Status */
   --color-success: #059669;
   --color-success-bg: #D1FAE5;
@@ -60,7 +67,7 @@
   /* Page & Card Backgrounds */
   --color-page-bg: var(--color-gray-50);
   --color-card-bg: var(--color-white);
-  --color-card-border: var(--color-gray-200);
+  --color-card-border: var(--color-accent-border);
   
   /* Focus Shadows */
   --shadow-focus-primary: 0 0 0 3px rgba(0, 102, 204, 0.2);

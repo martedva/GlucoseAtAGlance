@@ -9,17 +9,16 @@
   align-items: center;
   justify-content: center;
   padding: var(--spacing-2);
-  border: 2px solid var(--color-accent-border);
+  border: none;
   border-radius: var(--radius-md);
-  background-color: var(--color-card-bg);
+  background-color: var(--color-gray-100);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: background-color var(--transition-fast);
   font-size: var(--font-size-lg);
 }
 
 .dropdown__trigger:hover {
-  border-color: var(--color-accent-border-hover);
-  background-color: var(--color-accent-light);
+  background-color: var(--color-gray-200);
 }
 
 .dropdown__trigger:focus-visible {

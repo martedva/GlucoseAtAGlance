@@ -1,12 +1,10 @@
 /* GlucoseDisplay Component Styles */
 .glucose-display {
+  composes: card from global;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--spacing-3);
-  padding: var(--spacing-4);
-  background-color: var(--color-gray-50);
-  border-radius: var(--radius-lg);
   width: 100%;
 }
 
@@ -22,19 +20,22 @@
 
 .glucose-display__header-left {
   display: flex;
-  flex-direction: column;
-  gap: var(--spacing-2);
+  align-items: center;
+  gap: var(--spacing-3);
 }
 
 .glucose-display__status-section {
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .glucose-display__sensor-status {
   font-size: var(--font-size-xs);
   color: var(--color-gray-500);
   display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .glucose-display__header-right {

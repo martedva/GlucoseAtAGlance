@@ -51,7 +51,7 @@
 }
 
 .btn--secondary:hover:not(:disabled) {
-  background-color: #545964;
+  background-color: var(--color-gray-600);
 }
 
 .btn--danger {

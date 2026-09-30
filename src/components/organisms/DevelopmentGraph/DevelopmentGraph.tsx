@@ -10,6 +10,22 @@ import './DevelopmentGraph.css';
 // Register Chart.js components
 Chart.register(...registerables);
 
+// Helper to get CSS variable value
+const getCssVar = (name: string): string => {
+  if (typeof window !== 'undefined') {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+  return '';
+};
+
+// Helper to convert hex to rgba
+const hexToRgba = (hex: string, alpha: number): string => {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
+
 export interface DevelopmentGraphProps {
   graphData: TransformedGraphDataPoint[];
   targetLow?: number;
@@ -46,6 +62,12 @@ const DevelopmentGraph = memo(function DevelopmentGraph({
       chartRef.current.destroy();
     }
 
+    // Get colors from CSS variables (supports dark mode)
+    const primaryColor = getCssVar('--color-primary');
+    const primaryColorRgba = hexToRgba(primaryColor, 0.1);
+    const stableColor = getCssVar('--glucose-stable');
+    const stableColorRgba = hexToRgba(stableColor, 0.1);
+
     // Prepare data - use Date objects for proper time-based x-axis
     const chartData = graphData.map((d) => ({
       x: d.time,
@@ -57,8 +79,8 @@ const DevelopmentGraph = memo(function DevelopmentGraph({
       {
         label: 'Glucose',
         data: chartData,
-        borderColor: '#2196f3',
-        backgroundColor: 'rgba(33, 150, 243, 0.1)',
+        borderColor: primaryColor,
+        backgroundColor: primaryColorRgba,
         borderWidth: 2,
         fill: true,
         tension: 0.4,
@@ -83,12 +105,12 @@ const DevelopmentGraph = memo(function DevelopmentGraph({
             { x: lastTime, y: lastPoint.value },
             { x: fifteenMinLater, y: predictedValue },
           ],
-          borderColor: '#999999', // gray
+          borderColor: stableColor,
           borderWidth: 2,
-          borderDash: [3, 3], // smaller dashes with shorter gaps
+          borderDash: [3, 3],
           fill: true,
-          backgroundColor: 'rgba(153, 153, 153, 0.1)', // light gray fill
-          pointRadius: 0, // hide points
+          backgroundColor: stableColorRgba,
+          pointRadius: 0,
         });
       }
     }
@@ -139,6 +161,7 @@ const DevelopmentGraph = memo(function DevelopmentGraph({
               font: {
                 size: 10,
               },
+              color: getCssVar('--color-gray-500'),
               source: 'auto',
             },
           },
@@ -147,12 +170,13 @@ const DevelopmentGraph = memo(function DevelopmentGraph({
             min: 0,
             max: 21,
             grid: {
-              color: '#e0e0e0',
+              color: getCssVar('--color-gray-200'),
             },
             ticks: {
               font: {
                 size: 10,
               },
+              color: getCssVar('--color-gray-500'),
             },
           },
         },
@@ -168,7 +192,7 @@ const DevelopmentGraph = memo(function DevelopmentGraph({
             const maxY = scales.y.getPixelForValue(targetLow);
 
             ctx.save();
-            ctx.fillStyle = 'rgba(136, 186, 130, 0.3)';
+            ctx.fillStyle = getCssVar('--target-range-bg-light');
             ctx.fillRect(chartArea.left, minY, chartArea.right - chartArea.left, maxY - minY);
             ctx.restore();
           },

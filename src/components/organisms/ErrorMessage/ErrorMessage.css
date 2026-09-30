@@ -35,6 +35,6 @@
 }
 
 .error-message__retry-button:focus-visible {
-  outline: 2px solid #991b1b;
+  outline: 2px solid var(--color-error-text);
   outline-offset: 2px;
 }

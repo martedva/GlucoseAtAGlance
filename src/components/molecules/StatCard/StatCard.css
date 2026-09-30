@@ -1,11 +1,8 @@
 /* StatCard Component Styles */
 .stat-card {
+  composes: card from global;
   padding: var(--spacing-3);
-  border: 1px solid var(--color-gray-200);
-  border-radius: var(--radius-lg);
-  background-color: var(--color-white);
   min-width: 0;
-  box-sizing: border-box;
   flex: 1;
 }
 

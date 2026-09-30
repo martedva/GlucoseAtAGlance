@@ -75,11 +75,11 @@ const GlucoseDisplay = memo(function GlucoseDisplay({
             >
               {connectionDisplay.icon} {connectionDisplay.text}
             </span>
-            {sensorStatusDisplay && (
-              <div className="glucose-display__sensor-status">{sensorStatusDisplay}</div>
-            )}
+            <span className="glucose-display__time">{displayTime.toLocaleTimeString()}</span>
           </div>
-          <span className="glucose-display__time">{displayTime.toLocaleTimeString()}</span>
+          {sensorStatusDisplay && (
+            <div className="glucose-display__sensor-status">{sensorStatusDisplay}</div>
+          )}
         </div>
         <div className="glucose-display__header-right">{children}</div>
       </div>

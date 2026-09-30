@@ -8,21 +8,21 @@ import {
   SettingsPanel,
   StatisticsPanel,
 } from '@/components/organisms';
-import type { UserPreferences } from '@/hooks/usePreferences';
 import { UI_CONFIG } from '@/config';
 import {
   useAuth,
   useAutoRefresh,
   useConnectionStatus,
+  useExtensionIcon,
   useGlucoseData,
   useGlucoseTargets,
   useInitialFetch,
   useKeyboardShortcuts,
   usePreferences,
-  useExtensionIcon,
   useTheme,
 } from '@/hooks';
 import { useLogbookData } from '@/hooks/useLogbookData';
+import type { UserPreferences } from '@/hooks/usePreferences';
 import { useSensorExpiry } from '@/hooks/useSensorExpiry';
 import { parseLibreTimestamp } from '@/types/api';
 import '@/styles/global.css';
@@ -40,7 +40,14 @@ function App() {
   const { theme, toggleTheme, isLoaded: isThemeLoaded } = useTheme();
 
   // Data fetching
-  const { data, graphData, isLoading: isDataLoading, error, lastFetchTime, fetchData } = useGlucoseData();
+  const {
+    data,
+    graphData,
+    isLoading: isDataLoading,
+    error,
+    lastFetchTime,
+    fetchData,
+  } = useGlucoseData();
   const { logbookGraphData, isLoading: isLogbookLoading } = useLogbookData();
 
   // Derived data from hooks
@@ -88,34 +95,37 @@ function App() {
     [savePreferences]
   );
 
-  const handleTestNotification = useCallback((type: 'low' | 'high') => {
-    const isMmol = apiUom === 0;
-    const testValues = isMmol
-      ? { low: { value: 3.5, threshold: 4.0 }, high: { value: 12.0, threshold: 10.0 } }
-      : { low: { value: 63, threshold: 72 }, high: { value: 216, threshold: 180 } };
+  const handleTestNotification = useCallback(
+    (type: 'low' | 'high') => {
+      const isMmol = apiUom === 0;
+      const testValues = isMmol
+        ? { low: { value: 3.5, threshold: 4.0 }, high: { value: 12.0, threshold: 10.0 } }
+        : { low: { value: 63, threshold: 72 }, high: { value: 216, threshold: 180 } };
 
-    const test = testValues[type];
-    const unit = isMmol ? 'mmol/L' : 'mg/dL';
-    const title = type === 'low' ? '⚠️ Low Glucose Alert' : '⚠️ High Glucose Alert';
-    const body =
-      type === 'low'
-        ? `Your glucose is ${test.value} ${unit} (below ${test.threshold} ${unit})`
-        : `Your glucose is ${test.value} ${unit} (above ${test.threshold} ${unit})`;
+      const test = testValues[type];
+      const unit = isMmol ? 'mmol/L' : 'mg/dL';
+      const title = type === 'low' ? '⚠️ Low Glucose Alert' : '⚠️ High Glucose Alert';
+      const body =
+        type === 'low'
+          ? `Your glucose is ${test.value} ${unit} (below ${test.threshold} ${unit})`
+          : `Your glucose is ${test.value} ${unit} (above ${test.threshold} ${unit})`;
 
-    chrome.runtime.sendMessage(
-      {
-        action: 'ShowNotification',
-        title,
-        body,
-        type: 'warning' as const,
-      },
-      (response) => {
-        if (chrome.runtime.lastError) {
-          console.error('[Test Notification] Error:', chrome.runtime.lastError.message);
+      chrome.runtime.sendMessage(
+        {
+          action: 'ShowNotification',
+          title,
+          body,
+          type: 'warning' as const,
+        },
+        (response) => {
+          if (chrome.runtime.lastError) {
+            console.error('[Test Notification] Error:', chrome.runtime.lastError.message);
+          }
         }
-      }
-    );
-  }, [apiUom]);
+      );
+    },
+    [apiUom]
+  );
 
   // Side effects via hooks
   useExtensionIcon(data?.data.connection.glucoseItem);
@@ -188,13 +198,7 @@ function App() {
         </GlucoseDisplay>
 
         {/* Error message with retry */}
-        {error && (
-          <ErrorMessage
-            error={error}
-            onRetry={handleRefresh}
-            isRetrying={isDataLoading}
-          />
-        )}
+        {error && <ErrorMessage error={error} onRetry={handleRefresh} isRetrying={isDataLoading} />}
 
         {/* Glucose graph with target range */}
         <DevelopmentGraph
@@ -214,11 +218,6 @@ function App() {
           isLoading={isDataLoading || isLogbookLoading}
           uom={apiUom}
         />
-
-        {/* Keyboard shortcuts hint */}
-        <p className="keyboard-hint" aria-hidden="true">
-          Shortcuts: Ctrl+R Refresh • Ctrl+S Settings • Ctrl+L Logout
-        </p>
       </div>
 
       <SettingsPanel

@@ -1,12 +1,12 @@
+export type { Theme } from '@/stores';
+export { useAutoRefresh } from './useAutoRefresh';
 export { useConnectionStatus } from './useConnectionStatus';
+export { useExtensionIcon } from './useExtensionIcon';
 export { useGlucoseData } from './useGlucoseData';
 export { useGlucoseTargets } from './useGlucoseTargets';
+export { useInitialFetch } from './useInitialFetch';
+export { useKeyboardShortcuts } from './useKeyboardShortcuts';
 export { usePreferences } from './usePreferences';
 export { useSensorExpiry } from './useSensorExpiry';
 export { useAuth, useStorage } from './useStorage';
-export { useKeyboardShortcuts } from './useKeyboardShortcuts';
-export { useExtensionIcon } from './useExtensionIcon';
-export { useAutoRefresh } from './useAutoRefresh';
-export { useInitialFetch } from './useInitialFetch';
 export { useTheme } from './useTheme';
-export type { Theme } from '@/stores';

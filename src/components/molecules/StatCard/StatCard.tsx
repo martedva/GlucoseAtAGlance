@@ -14,7 +14,7 @@ export interface StatCardProps {
  */
 const StatCard = memo(function StatCard({ label, value, unit, subtext }: StatCardProps) {
   return (
-    <div className="stat-card" role="article" aria-label={`${label}: ${value}${unit || ''}`}>
+    <div className="stat-card card" role="article" aria-label={`${label}: ${value}${unit || ''}`}>
       <div className="stat-card__label">{label}</div>
       <div className="stat-card__value">
         {value}

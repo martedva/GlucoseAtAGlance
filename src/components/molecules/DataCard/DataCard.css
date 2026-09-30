@@ -1,6 +1,5 @@
 /* DataCard Component Styles */
 .data-card {
-  composes: card from global;
   padding: var(--spacing-3);
   width: 100%;
 }

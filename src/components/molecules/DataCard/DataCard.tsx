@@ -14,7 +14,7 @@ export interface DataCardProps {
  */
 const DataCard = memo(function DataCard({ children, className = '', role, 'aria-label': ariaLabel }: DataCardProps) {
   return (
-    <div className={`data-card ${className}`} role={role} aria-label={ariaLabel}>
+    <div className={`data-card card ${className}`} role={role} aria-label={ariaLabel}>
       {children}
     </div>
   );

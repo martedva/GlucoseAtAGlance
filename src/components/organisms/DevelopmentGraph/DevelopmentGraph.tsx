@@ -1,6 +1,9 @@
 import { memo, useEffect, useRef } from 'react';
 import { Chart, registerables } from 'chart.js';
+import 'chartjs-adapter-date-fns';
 import { LoadingSkeleton } from '@/components/atoms';
+import { DataCard } from '@/components/molecules';
+import { predictGlucoseTrend } from '@/utils/trend-prediction';
 import type { TransformedGraphDataPoint } from '@/hooks/useGlucoseData';
 import './DevelopmentGraph.css';
 
@@ -43,27 +46,58 @@ const DevelopmentGraph = memo(function DevelopmentGraph({
       chartRef.current.destroy();
     }
 
-    // Prepare data
-    const labels = graphData.map((d) => d.time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-    const values = graphData.map((d) => d.value);
+    // Prepare data - use Date objects for proper time-based x-axis
+    const chartData = graphData.map((d) => ({
+      x: d.time,
+      y: d.value,
+    }));
+
+    // Create base dataset
+    const datasets: any[] = [
+      {
+        label: 'Glucose',
+        data: chartData,
+        borderColor: '#2196f3',
+        backgroundColor: 'rgba(33, 150, 243, 0.1)',
+        borderWidth: 2,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 0,
+      },
+    ];
+
+    // Add trend prediction line if we have enough data
+    if (graphData.length >= 2) {
+      const trendPrediction = predictGlucoseTrend(graphData);
+      
+      if (trendPrediction) {
+        const lastPoint = graphData[graphData.length - 1];
+        const lastTime = lastPoint.time;
+        const fifteenMinLater = new Date(lastTime.getTime() + 15 * 60 * 1000);
+        const predictedValue = lastPoint.value + trendPrediction.predictedChange15min;
+        
+        // Add prediction line dataset - extends naturally from last data point
+        datasets.push({
+          label: 'Prediction',
+          data: [
+            { x: lastTime, y: lastPoint.value },
+            { x: fifteenMinLater, y: predictedValue },
+          ],
+          borderColor: '#999999', // gray
+          borderWidth: 2,
+          borderDash: [3, 3], // smaller dashes with shorter gaps
+          fill: true,
+          backgroundColor: 'rgba(153, 153, 153, 0.1)', // light gray fill
+          pointRadius: 0, // hide points
+        });
+      }
+    }
 
     // Create new chart
     chartRef.current = new Chart(ctx, {
       type: 'line',
       data: {
-        labels,
-        datasets: [
-          {
-            label: 'Glucose',
-            data: values,
-            borderColor: '#2196f3',
-            backgroundColor: 'rgba(33, 150, 243, 0.1)',
-            borderWidth: 2,
-            fill: true,
-            tension: 0.4,
-            pointRadius: 0,
-          },
-        ],
+        datasets,
       },
       options: {
         responsive: true,
@@ -80,22 +114,32 @@ const DevelopmentGraph = memo(function DevelopmentGraph({
             callbacks: {
               label: (context: any) => {
                 const value = context.parsed.y;
-                return `${value} ${unit}`;
+                // Format to 1 decimal place for cleaner display
+                const formattedValue = typeof value === 'number' ? value.toFixed(1) : value;
+                return `${formattedValue} ${unit}`;
               },
             },
           },
         },
         scales: {
           x: {
+            type: 'time',
             display: true,
             grid: {
               display: false,
+            },
+            time: {
+              unit: 'minute',
+              displayFormats: {
+                minute: 'HH:mm',
+              },
             },
             ticks: {
               maxTicksLimit: 6,
               font: {
                 size: 10,
               },
+              source: 'auto',
             },
           },
           y: {
@@ -142,22 +186,20 @@ const DevelopmentGraph = memo(function DevelopmentGraph({
 
   if (isLoading) {
     return (
-      <div className="graph-container">
-        <h3 className="graph-container__title">Glucose Trend</h3>
+      <DataCard className="graph-container">
         <div className="graph-container__canvas-wrapper">
           <LoadingSkeleton height="100%" />
         </div>
-      </div>
+      </DataCard>
     );
   }
 
   return (
-    <div className="graph-container" role="region" aria-label="Glucose trend graph">
-      <h3 className="graph-container__title">Glucose Trend</h3>
+    <DataCard className="graph-container" role="region" aria-label="Glucose trend graph">
       <div className="graph-container__canvas-wrapper">
         <canvas ref={canvasRef} className="graph-container__canvas" />
       </div>
-    </div>
+    </DataCard>
   );
 });
 

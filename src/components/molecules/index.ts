@@ -1,6 +1,9 @@
 export { default as StatCard } from './StatCard/StatCard';
 export type { StatCardProps } from './StatCard/StatCard';
 
+export { default as DataCard } from './DataCard/DataCard';
+export type { DataCardProps } from './DataCard/DataCard';
+
 export { default as TabButton } from './TabButton/TabButton';
 export type { TabButtonProps } from './TabButton/TabButton';
 

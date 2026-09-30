@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import { crx } from '@crxjs/vite-plugin';
 import react from '@vitejs/plugin-react';
 import tsconfigPaths from 'vite-tsconfig-paths';
+import { viteStaticCopy } from 'vite-plugin-static-copy';
 import manifest from './public/manifest.json';
 import { fileURLToPath, URL } from 'node:url';
 
@@ -12,6 +13,14 @@ export default defineConfig({
     crx({
       manifest,
       browser: 'chrome',
+    }),
+    viteStaticCopy({
+      targets: [
+        {
+          src: 'assets/icons/*.png',
+          dest: 'assets/icons',
+        },
+      ],
     }),
   ],
   build: {

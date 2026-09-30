@@ -4,8 +4,10 @@ import './Icon.css';
 export type IconSize = 'small' | 'medium' | 'large';
 export type IconVariant = 
   | 'trend-up'
+  | 'trend-right-up'
+  | 'trend-right'
+  | 'trend-right-down'
   | 'trend-down'
-  | 'trend-stable'
   | 'status-success'
   | 'status-warning'
   | 'status-error'

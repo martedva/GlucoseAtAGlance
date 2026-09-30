@@ -2,15 +2,22 @@ import { memo } from 'react';
 import { Icon } from '@/components/atoms';
 import type { TransformedGraphDataPoint } from '@/hooks/useGlucoseData';
 import type { SensorExpiryStatus } from '@/hooks/useSensorExpiry';
+import { predictGlucoseTrend } from '@/utils/trend-prediction';
 import './GlucoseDisplay.css';
+
+export type ConnectionStatus = 'online' | 'offline' | 'stale';
 
 export interface GlucoseDisplayProps {
   glucose?: number;
+  glucoseTime?: Date;
+  connectionStatus?: ConnectionStatus;
+  lastFetchTime?: Date | null;
   daysToExpire: number | null;
   sensorStatus: SensorExpiryStatus;
   graphData: TransformedGraphDataPoint[];
   currentTrendArrow?: number;
   uom: number; // 0 = mg/dL, 1 = mmol/L
+  children?: React.ReactNode;
 }
 
 /**
@@ -19,11 +26,15 @@ export interface GlucoseDisplayProps {
  */
 const GlucoseDisplay = memo(function GlucoseDisplay({
   glucose,
+  glucoseTime,
+  connectionStatus = 'online',
+  lastFetchTime,
   daysToExpire,
   sensorStatus,
   graphData,
   currentTrendArrow,
   uom,
+  children,
 }: GlucoseDisplayProps) {
   if (glucose === undefined) return null;
 
@@ -31,15 +42,21 @@ const GlucoseDisplay = memo(function GlucoseDisplay({
   const trendIcon = getTrendIcon(currentTrendArrow);
   const trendClass = getTrendClass(currentTrendArrow);
 
-  // Calculate delta (change from previous reading) - round to avoid decimals
-  const delta = graphData.length >= 2
-    ? Math.round(graphData[graphData.length - 1].value - graphData[graphData.length - 2].value)
-    : 0;
+  // Calculate delta (change from previous reading) - 1 decimal place
+  const delta =
+    graphData.length >= 2
+      ? graphData[graphData.length - 1].value - graphData[graphData.length - 2].value
+      : 0;
 
-  // Get latest reading time
-  const latestTime = graphData.length > 0
-    ? graphData[graphData.length - 1].time
-    : new Date();
+  // Calculate predicted glucose (15 min forecast)
+  const prediction = graphData.length >= 2 ? predictGlucoseTrend(graphData) : null;
+  const predictedValue = prediction ? (glucose + prediction.predictedChange15min).toFixed(1) : null;
+
+  // Use the glucose measurement time (passed from parent), fallback to current time
+  const displayTime = glucoseTime || new Date();
+
+  // Connection status display
+  const connectionDisplay = getConnectionDisplay(connectionStatus, lastFetchTime);
 
   // Sensor expiry status display
   const sensorStatusDisplay = getSensorStatusDisplay(daysToExpire, sensorStatus);
@@ -49,36 +66,52 @@ const GlucoseDisplay = memo(function GlucoseDisplay({
 
   return (
     <div className="glucose-display" role="region" aria-label="Current glucose reading">
-      {/* Header row: Live data indicator + sensor status + time */}
+      {/* Header row: status + time on left, actions on right */}
       <div className="glucose-display__header">
-        <span className="glucose-display__live-indicator">
-          ✅ Live data
-        </span>
-        {sensorStatusDisplay && (
-          <span className="glucose-display__sensor-status">
-            {sensorStatusDisplay}
-          </span>
-        )}
-        <span className="glucose-display__time">
-          {latestTime.toLocaleTimeString()}
-        </span>
+        <div className="glucose-display__header-left">
+          <div className="glucose-display__status-section">
+            <span
+              className={`glucose-display__status-indicator glucose-display__status-indicator--${connectionStatus}`}
+            >
+              {connectionDisplay.icon} {connectionDisplay.text}
+            </span>
+            <span className="glucose-display__time">{displayTime.toLocaleTimeString()}</span>
+          </div>
+          {sensorStatusDisplay && (
+            <div className="glucose-display__sensor-status">{sensorStatusDisplay}</div>
+          )}
+        </div>
+        <div className="glucose-display__header-right">{children}</div>
       </div>
 
-      {/* Main glucose value */}
-      <div className="glucose-display__value" aria-live="polite">
-        {glucose}
-        <span className="glucose-display__unit"> {unit}</span>
-      </div>
-
-      {/* Trend row: arrow + delta */}
-      <div className={`glucose-display__trend ${trendClass}`}>
-        <Icon variant={trendIcon} size="large">
-          {trendIcon === 'trend-up' ? '↑' : trendIcon === 'trend-down' ? '↓' : '→'}
+      {/* Main glucose value with trend arrow */}
+      <div className="glucose-display__value-container">
+        <Icon variant={trendIcon} size="large" className="glucose-display__trend-icon">
+          {trendIcon === 'trend-up'
+            ? '↑'
+            : trendIcon === 'trend-right-up'
+              ? '↗'
+              : trendIcon === 'trend-right'
+                ? '→'
+                : trendIcon === 'trend-right-down'
+                  ? '↘'
+                  : '↓'}
         </Icon>
-        {delta !== 0 && (
-          <span className="glucose-display__delta">
-            {delta > 0 ? '+' : ''}
-            {delta} {unit}/5min
+        <div className="glucose-display__value" aria-live="polite">
+          <span>{glucose}</span>
+          <span className="glucose-display__unit"> {unit}</span>
+        </div>
+      </div>
+
+      {/* Trend row: delta + prediction */}
+      <div className={`glucose-display__trend ${trendClass}`}>
+        <span className="glucose-display__delta">
+          {delta >= 0 ? '+' : ''}
+          {delta.toFixed(1)} {unit}/5min
+        </span>
+        {predictedValue && (
+          <span className="glucose-display__prediction">
+            → {predictedValue} {unit}
           </span>
         )}
       </div>
@@ -86,12 +119,25 @@ const GlucoseDisplay = memo(function GlucoseDisplay({
   );
 });
 
-function getTrendIcon(arrow: number | undefined): 'trend-up' | 'trend-down' | 'trend-stable' {
-  if (!arrow) return 'trend-stable';
+function getTrendIcon(
+  arrow: number | undefined
+): 'trend-up' | 'trend-right-up' | 'trend-right' | 'trend-right-down' | 'trend-down' {
+  if (!arrow) return 'trend-right';
   // 1=down, 2=right-down, 3=right, 4=right-up, 5=up
-  if (arrow <= 2) return 'trend-down';
-  if (arrow >= 4) return 'trend-up';
-  return 'trend-stable';
+  switch (arrow) {
+    case 1:
+      return 'trend-down';
+    case 2:
+      return 'trend-right-down';
+    case 3:
+      return 'trend-right';
+    case 4:
+      return 'trend-right-up';
+    case 5:
+      return 'trend-up';
+    default:
+      return 'trend-right';
+  }
 }
 
 function getTrendClass(arrow: number | undefined): string {
@@ -99,11 +145,33 @@ function getTrendClass(arrow: number | undefined): string {
   return `glucose-display__trend--${icon}`;
 }
 
-function getSensorStatusDisplay(daysToExpire: number | null, status: SensorExpiryStatus): string | null {
+function getSensorStatusDisplay(
+  daysToExpire: number | null,
+  status: SensorExpiryStatus
+): JSX.Element | null {
   if (daysToExpire === null) return null;
-  if (status === 'critical') return `⚠️ Expires in ${daysToExpire}d`;
-  if (status === 'warning') return `Expires in ${daysToExpire}d`;
-  return null;
+
+  const icon = status === 'critical' || status === 'warning' ? '⚠️' : '📅';
+
+  return (
+    <>
+      {icon} Sensor expires in {daysToExpire} day{daysToExpire !== 1 ? 's' : ''}
+    </>
+  );
+}
+
+function getConnectionDisplay(
+  status: ConnectionStatus,
+  lastFetchTime: Date | null | undefined
+): { icon: string; text: string } {
+  switch (status) {
+    case 'offline':
+      return { icon: '❌', text: 'No connection' };
+    case 'stale':
+      return { icon: '⚠️', text: 'Data outdated' };
+    default:
+      return { icon: '✅', text: 'Live data' };
+  }
 }
 
 export default GlucoseDisplay;

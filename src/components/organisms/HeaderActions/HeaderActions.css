@@ -2,4 +2,5 @@
 .header-actions {
   display: flex;
   gap: var(--spacing-2);
+  justify-content: flex-end;
 }

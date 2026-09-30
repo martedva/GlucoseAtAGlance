@@ -1,6 +1,8 @@
 import { memo, useState } from 'react';
 import { Button, Input } from '@/components/atoms';
 import { AlertBanner } from '@/components/molecules';
+import { authService } from '@/services/authService';
+import { useAuth } from '@/hooks';
 import './LoginForm.css';
 
 export interface LoginFormProps {
@@ -17,6 +19,7 @@ const LoginForm = memo(function LoginForm({ onLoginSuccess, onError }: LoginForm
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,25 +34,8 @@ const LoginForm = memo(function LoginForm({ onLoginSuccess, onError }: LoginForm
     setIsLoading(true);
 
     try {
-      await new Promise<void>((resolve, reject) => {
-        chrome.runtime.sendMessage(
-          {
-            action: 'Login',
-            email,
-            password,
-          },
-          (response: { success?: boolean; error?: string }) => {
-            if (chrome.runtime.lastError) {
-              reject(new Error(chrome.runtime.lastError.message));
-            } else if (response.error) {
-              reject(new Error(response.error));
-            } else {
-              resolve();
-            }
-          }
-        );
-      });
-
+      const tokenData = await authService.login(email, password);
+      await login(tokenData.token, tokenData.patientId);
       onLoginSuccess();
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Login failed';

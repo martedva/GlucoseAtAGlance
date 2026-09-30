@@ -165,7 +165,10 @@ async function handleGlucoseCheck() {
     const arrow = TREND_ARROWS[glucoseItem.TrendArrow as keyof typeof TREND_ARROWS];
 
     if (!color || !arrow) {
-      console.error('[Background] Invalid color or arrow:', { color, arrow });
+      console.error('[Background] Invalid color or arrow:', {
+        MeasurementColor: glucoseItem.MeasurementColor,
+        TrendArrow: glucoseItem.TrendArrow,
+      });
       return;
     }
 

@@ -46,9 +46,6 @@ const StatisticsPanel = memo(function StatisticsPanel({
   if (isLoading) {
     return (
       <div className="statistics-panel">
-        <div className="statistics-panel__header">
-          <h3 className="statistics-panel__title">Statistics</h3>
-        </div>
         <div className="statistics-panel__cards">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="stat-card">
@@ -57,14 +54,6 @@ const StatisticsPanel = memo(function StatisticsPanel({
             </div>
           ))}
         </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="statistics-panel" role="region" aria-label="Glucose statistics">
-      <div className="statistics-panel__header">
-        <h3 className="statistics-panel__title">Statistics</h3>
         <div className="statistics-panel__tabs" role="tablist">
           {periods.map((p) => (
             <TabButton
@@ -79,7 +68,11 @@ const StatisticsPanel = memo(function StatisticsPanel({
           ))}
         </div>
       </div>
+    );
+  }
 
+  return (
+    <div className="statistics-panel" role="region" aria-label="Glucose statistics">
       <div className="statistics-panel__cards">
         <StatCard
           label="Avg"
@@ -104,6 +97,19 @@ const StatisticsPanel = memo(function StatisticsPanel({
           value={`${stats.tir.toFixed(0)}%`}
           subtext="Time in Range"
         />
+      </div>
+      <div className="statistics-panel__tabs" role="tablist">
+        {periods.map((p) => (
+          <TabButton
+            key={p}
+            isActive={period === p}
+            onClick={() => setPeriod(p)}
+            role="tab"
+            aria-selected={period === p}
+          >
+            {p}
+          </TabButton>
+        ))}
       </div>
     </div>
   );

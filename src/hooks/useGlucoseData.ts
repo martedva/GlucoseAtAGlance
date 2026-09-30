@@ -75,13 +75,20 @@ export function useGlucoseData(): UseGlucoseDataReturn {
     setError(null);
   }, []);
 
-  // Transform raw API data to graph-ready format
+  // Transform raw API data to graph-ready format, filtering to recent data only
   const graphData: TransformedGraphDataPoint[] = useMemo(() => {
     if (!data?.data.graphData) return [];
-    return data.data.graphData.map((item) => ({
-      time: parseLibreTimestamp(item.Timestamp),
-      value: item.Value,
-    }));
+    
+    // Filter to show only recent data (last 6 hours) to avoid showing old historical data
+    const now = Date.now();
+    const sixHoursAgo = now - (6 * 60 * 60 * 1000);
+    
+    return data.data.graphData
+      .map((item) => ({
+        time: parseLibreTimestamp(item.Timestamp),
+        value: item.Value,
+      }))
+      .filter((point) => point.time.getTime() > sixHoursAgo);
   }, [data?.data.graphData]);
 
   return {

@@ -1,6 +1,5 @@
 import { useCallback, useState } from 'react';
 import {
-  ConnectionStatusIndicator,
   DevelopmentGraph,
   ErrorMessage,
   GlucoseDisplay,
@@ -24,6 +23,7 @@ import {
 } from '@/hooks';
 import { useLogbookData } from '@/hooks/useLogbookData';
 import { useSensorExpiry } from '@/hooks/useSensorExpiry';
+import { parseLibreTimestamp } from '@/types/api';
 import '@/styles/global.css';
 
 /**
@@ -41,7 +41,7 @@ function App() {
 
   // Derived data from hooks
   const { targetLow, targetHigh } = useGlucoseTargets(data?.data);
-  const { daysToExpire, sensorStatus } = useSensorExpiry(data?.data?.activeSensors?.[0]);
+  const { daysToExpire, sensorStatus } = useSensorExpiry(data?.data?.connection?.sensor);
   const { preferences, savePreferences, isLoading: isPrefsLoading } = usePreferences();
   const { status: connectionStatus } = useConnectionStatus(
     preferences.refreshInterval,
@@ -50,8 +50,11 @@ function App() {
 
   // Extract data for display (before callbacks)
   const glucoseValue = data?.data.connection.glucoseItem.Value;
+  const glucoseTime = data?.data.connection.glucoseItem.Timestamp
+    ? parseLibreTimestamp(data.data.connection.glucoseItem.Timestamp)
+    : new Date();
   const currentTrendArrow = data?.data.connection.glucoseItem.TrendArrow;
-  // Use API's uom (0 = mmol/L, 1 = mg/dL) - this is the user's actual preferred unit
+  // Use API's uom (0 = mmol/L, 1 = mmol/L) - this is the user's actual preferred unit
   const apiUom = data?.data.connection.uom ?? 0;
 
   // UI state
@@ -158,29 +161,25 @@ function App() {
   return (
     <div className="App" style={{ width: `${UI_CONFIG.POPUP_WIDTH}px` }}>
       <div className="app-content" role="main" aria-label="Glucose monitoring dashboard">
-        {/* Connection Status Indicator - Critical for safety */}
-        <ConnectionStatusIndicator
-          status={connectionStatus}
-          lastSuccessfulFetch={lastFetchTime}
-        />
-
-        {/* Header with glucose display and action buttons */}
-        <div className="app-header">
-          <GlucoseDisplay
-            glucose={glucoseValue}
-            daysToExpire={daysToExpire}
-            sensorStatus={sensorStatus}
-            graphData={graphData}
-            currentTrendArrow={currentTrendArrow}
-            uom={apiUom}
-          />
+        {/* Glucose display with header actions */}
+        <GlucoseDisplay
+          glucose={glucoseValue}
+          glucoseTime={glucoseTime}
+          connectionStatus={connectionStatus}
+          lastFetchTime={lastFetchTime}
+          daysToExpire={daysToExpire}
+          sensorStatus={sensorStatus}
+          graphData={graphData}
+          currentTrendArrow={currentTrendArrow}
+          uom={apiUom}
+        >
           <HeaderActions
             onRefresh={handleRefresh}
             onOpenSettings={handleOpenSettings}
             onLogout={logout}
             isRefreshing={isDataLoading}
           />
-        </div>
+        </GlucoseDisplay>
 
         {/* Error message with retry */}
         {error && (

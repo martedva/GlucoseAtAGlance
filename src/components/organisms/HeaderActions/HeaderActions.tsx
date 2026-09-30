@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { Button } from '@/components/atoms';
+import { Button, Dropdown } from '@/components/atoms';
 import type { Theme } from '@/stores';
 import './HeaderActions.css';
 
@@ -14,7 +14,7 @@ export interface HeaderActionsProps {
 
 /**
  * Organism HeaderActions component
- * Header action buttons (Theme Toggle, Refresh, Settings, Logout)
+ * Header action buttons (Theme Toggle, Refresh, Settings, Profile/Logout)
  */
 const HeaderActions = memo(function HeaderActions({
   onRefresh,
@@ -48,13 +48,20 @@ const HeaderActions = memo(function HeaderActions({
       >
         ⚙️
       </Button>
-      <Button
-        onClick={onLogout}
-        aria-label="Log out of account (Ctrl+L)"
-        title="Log out (Ctrl+L)"
-      >
-        ↗️
-      </Button>
+      <Dropdown
+        trigger={
+          <span aria-hidden="true">👤</span>
+        }
+        options={[
+          {
+            label: 'Logout',
+            value: 'logout',
+            onClick: onLogout,
+            danger: true,
+          },
+        ]}
+        align="right"
+      />
     </div>
   );
 });

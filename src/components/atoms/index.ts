@@ -4,6 +4,9 @@ export type { ButtonProps, ButtonVariant, ButtonSize } from './Button/Button';
 export { default as Badge } from './Badge/Badge';
 export type { BadgeProps, BadgeVariant } from './Badge/Badge';
 
+export { default as Dropdown } from './Dropdown/Dropdown';
+export type { DropdownProps, DropdownOption } from './Dropdown/Dropdown';
+
 export { default as Icon } from './Icon/Icon';
 export type { IconProps, IconSize, IconVariant } from './Icon/Icon';
 

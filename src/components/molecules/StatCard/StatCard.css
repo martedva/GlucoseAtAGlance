@@ -1,6 +1,6 @@
 /* StatCard Component Styles */
 .stat-card {
-  padding: var(--spacing-3);
+  padding: var(--spacing-2);
   min-width: 0;
   flex: 1;
 }

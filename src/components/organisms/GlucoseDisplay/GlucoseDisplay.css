@@ -109,8 +109,6 @@
   font-size: 44px;
   font-weight: var(--font-weight-bold);
   line-height: 1;
-  /* Align arrow with glucose value text */
-  transform: translateY(-4px);
 }
 
 .glucose-display__trend-icon.icon--trend-up,

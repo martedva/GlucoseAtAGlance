@@ -78,6 +78,24 @@
   color: var(--color-accent);
   line-height: 1;
   font-variant-numeric: tabular-nums;
+  transition: color var(--transition-normal);
+}
+
+/* Glucose value colors matching extension icon colors */
+.glucose-display__value--green {
+  color: #10B981;
+}
+
+.glucose-display__value--yellow {
+  color: #FBBF24;
+}
+
+.glucose-display__value--orange {
+  color: #F97316;
+}
+
+.glucose-display__value--red {
+  color: #EF4444;
 }
 
 .glucose-display__unit {

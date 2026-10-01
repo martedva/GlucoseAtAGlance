@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import {
   DevelopmentGraph,
   ErrorMessage,
@@ -19,8 +19,8 @@ import {
   useInitialFetch,
   useKeyboardShortcuts,
   usePreferences,
-  useTheme,
 } from '@/hooks';
+import { useTheme } from '@/stores';
 import { useLogbookData } from '@/hooks/useLogbookData';
 import type { UserPreferences } from '@/hooks/usePreferences';
 import { useSensorExpiry } from '@/hooks/useSensorExpiry';
@@ -38,6 +38,13 @@ function App() {
 
   // Theme management
   const { theme, toggleTheme, isLoaded: isThemeLoaded } = useTheme();
+
+  // Apply theme to document when it changes (side effect belongs in component)
+  useEffect(() => {
+    if (isThemeLoaded) {
+      document.documentElement.setAttribute('data-theme', theme);
+    }
+  }, [theme, isThemeLoaded]);
 
   // Data fetching
   const {
@@ -65,6 +72,7 @@ function App() {
     ? parseLibreTimestamp(data.data.connection.glucoseItem.Timestamp)
     : new Date();
   const currentTrendArrow = data?.data.connection.glucoseItem.TrendArrow;
+  const glucoseColorCode = data?.data.connection.glucoseItem.MeasurementColor;
   // Use API's uom (0 = mmol/L, 1 = mmol/L) - this is the user's actual preferred unit
   const apiUom = data?.data.connection.uom ?? 0;
 
@@ -185,6 +193,7 @@ function App() {
           sensorStatus={sensorStatus}
           graphData={graphData}
           currentTrendArrow={currentTrendArrow}
+          glucoseColorCode={glucoseColorCode}
           uom={apiUom}
         >
           <HeaderActions

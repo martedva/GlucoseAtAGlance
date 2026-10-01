@@ -1,4 +1,3 @@
-export type { Theme } from '@/stores';
 export { useAutoRefresh } from './useAutoRefresh';
 export { useConnectionStatus } from './useConnectionStatus';
 export { useExtensionIcon } from './useExtensionIcon';
@@ -9,4 +8,3 @@ export { useKeyboardShortcuts } from './useKeyboardShortcuts';
 export { usePreferences } from './usePreferences';
 export { useSensorExpiry } from './useSensorExpiry';
 export { useAuth, useStorage } from './useStorage';
-export { useTheme } from './useTheme';

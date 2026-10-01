@@ -3,7 +3,7 @@ import { Chart, registerables } from 'chart.js';
 import 'chartjs-adapter-date-fns';
 import { LoadingSkeleton } from '@/components/atoms';
 import { DataCard } from '@/components/molecules';
-import { useTheme } from '@/hooks/useTheme';
+import { useTheme } from '@/stores';
 import { predictGlucoseTrend } from '@/utils/trend-prediction';
 import type { TransformedGraphDataPoint } from '@/hooks/useGlucoseData';
 import './DevelopmentGraph.css';

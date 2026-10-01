@@ -1,8 +1,8 @@
-import { memo } from 'react';
 import { Icon } from '@/components/atoms';
 import type { TransformedGraphDataPoint } from '@/hooks/useGlucoseData';
 import type { SensorExpiryStatus } from '@/hooks/useSensorExpiry';
 import { predictGlucoseTrend } from '@/utils/trend-prediction';
+import { memo } from 'react';
 import './GlucoseDisplay.css';
 
 export type ConnectionStatus = 'online' | 'offline' | 'stale';
@@ -16,6 +16,7 @@ export interface GlucoseDisplayProps {
   sensorStatus: SensorExpiryStatus;
   graphData: TransformedGraphDataPoint[];
   currentTrendArrow?: number;
+  glucoseColorCode?: number; // 1=green, 2=yellow, 3=orange, 4=red (from API)
   uom: number; // 0 = mg/dL, 1 = mmol/L
   children?: React.ReactNode;
 }
@@ -33,6 +34,7 @@ const GlucoseDisplay = memo(function GlucoseDisplay({
   sensorStatus,
   graphData,
   currentTrendArrow,
+  glucoseColorCode,
   uom,
   children,
 }: GlucoseDisplayProps) {
@@ -41,6 +43,9 @@ const GlucoseDisplay = memo(function GlucoseDisplay({
   // Get trend arrow display
   const trendIcon = getTrendIcon(currentTrendArrow);
   const trendClass = getTrendClass(currentTrendArrow);
+
+  // Get glucose value color class based on API's MeasurementColor
+  const glucoseValueClass = getGlucoseValueClass(glucoseColorCode);
 
   // Calculate delta (change from previous reading) - 1 decimal place
   const delta =
@@ -97,7 +102,7 @@ const GlucoseDisplay = memo(function GlucoseDisplay({
                   ? '↘'
                   : '↓'}
         </Icon>
-        <div className="glucose-display__value" aria-live="polite">
+        <div className={`glucose-display__value ${glucoseValueClass}`} aria-live="polite">
           <span>{glucose}</span>
           <span className="glucose-display__unit"> {unit}</span>
         </div>
@@ -143,6 +148,27 @@ function getTrendIcon(
 function getTrendClass(arrow: number | undefined): string {
   const icon = getTrendIcon(arrow);
   return `glucose-display__trend--${icon}`;
+}
+
+/**
+ * Get CSS class for glucose value based on API's MeasurementColor
+ * 1 = green (in range), 2 = yellow, 3 = orange, 4 = red
+ */
+function getGlucoseValueClass(colorCode: number | undefined): string {
+  if (colorCode === undefined) return '';
+  
+  switch (colorCode) {
+    case 1:
+      return 'glucose-display__value--green';
+    case 2:
+      return 'glucose-display__value--yellow';
+    case 3:
+      return 'glucose-display__value--orange';
+    case 4:
+      return 'glucose-display__value--red';
+    default:
+      return 'glucose-display__value--green';
+  }
 }
 
 function getSensorStatusDisplay(

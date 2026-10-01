@@ -1,2 +1,2 @@
-export { useThemeStore, useThemeSync } from './themeStore';
+export { useThemeStore, useTheme } from './themeStore';
 export type { Theme } from './themeStore';

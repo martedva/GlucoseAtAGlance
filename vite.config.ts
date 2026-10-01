@@ -25,7 +25,8 @@ export default defineConfig({
   ],
   build: {
     outDir: 'build',
-    sourcemap: true,
+    sourcemap: false,
+    emptyOutDir: true,
     rollupOptions: {
       input: {
         popup: 'index.html',
